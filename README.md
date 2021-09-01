@@ -1,6 +1,11 @@
 ## IoT제어 프로젝트
 
-* 시뮬레이터 및 프로젝트 관련 파일 다운로드
-  - https://drive.google.com/drive/folders/1rp54qL31ZIoHet7A9BlvpoDCCdGVsvLK?usp=sharing
+### ROS 메시지 통신 노드 실행
 
-(위 경로에 위치한 프로그램 및 문서는 SSAFY 과정 내에서만 사용할 수 있으며 무단 복제 및 반출, 배포를 금합니다.)
+### IoT의 상태, 제어 메시지 송수신
+
+### 카메라 데이터 수신 및 영상처리
+
+### Hand Control 제어 메시지 송신
+
+### Odometry를 이용한 상대경로 생성 및 경로 추종
