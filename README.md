@@ -27,9 +27,10 @@
 ## 3. Ros2 명령어
 
 1. 빌드하기
-   call C:\dev\ros2_eloquent\setup.bat
-   cd C:\Users\wlsdu\Desktop\catkin_sub1
-   colcon build or colcon build --packages-select sub1
+
+   - call C:\dev\ros2_eloquent\setup.bat
+   - cd C:\Users\wlsdu\Desktop\catkin_sub1
+   - colcon build or colcon build --packages-select sub1
 
 2. 노드 실행하기
    call C:\dev\ros2_eloquent\setup.bat
