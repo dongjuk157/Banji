@@ -73,7 +73,12 @@ class loadMap(Node):
                     if grid[row][col] == 100:
 
                         # 로직 3. 점유영역 근처 필터처리
-                        pass
+                        # 5*5 기준이 정확히 어떻게 되는가?
+                        for dr in range(-5, 6):
+                            for dc in range(-5, 6):
+                                if 0 <= row + dr < self.map_size_x and 0 <= col + dc < self.map_size_y and grid[row + dr][col + dc] < 80:
+                                    grid[row + dr][col + dc] = 127
+
             np_map_data = grid.reshape(1, 350*350) 
             list_map_data = np_map_data.tolist()
 
