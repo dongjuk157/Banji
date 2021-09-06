@@ -114,6 +114,18 @@ def transformMTX_lidar2cam(params_lidar, params_cam):
     cam_pos = 
 
     """
+    lidar_yaw, lidar_pitch, lidar_roll = [np.deg2rad(
+        params_lidar.get(i)) for i in (["YAW", "PITCH", "ROLL"])]
+    cam_yaw, cam_pitch, cam_roll = [np.deg2rad(
+        params_cam.get(i)) for i in (["YAW", "PITCH", "ROLL"])]
+
+    # Relative position of lidar w.r.t cam
+    lidar_pos = [params_lidar.get(i) for i in (["X", "Y", "Z"])]
+    cam_pos = [params_cam.get(i) for i in (["X", "Y", "Z"])]
+    print('lidar_yaw: {}, lidar_pitch: {}, lidar_roll: {},\ncam_yaw: {}, cam_pitch: {}, cam_roll: {}'.format(
+        lidar_yaw, lidar_pitch, lidar_roll, cam_yaw, cam_pitch, cam_roll))
+    print('lidar_pos: {}, cam_pos: {}'.format(lidar_pos, cam_pos))
+    
 
     """
 
