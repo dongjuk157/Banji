@@ -31,52 +31,52 @@ class a_star(Node):
         self.map_sub = self.create_subscription(OccupancyGrid,'map',self.map_callback,1)
         self.odom_sub = self.create_subscription(Odometry,'odom',self.odom_callback,1)
         self.goal_sub = self.create_subscription(PoseStamped,'goal_pose',self.goal_callback,1)
-        self.a_star_pub= self.create_publisher(Path, 'global_path', 1)
+        self.a_star_pub = self.create_publisher(Path, 'global_path', 1)
         
-        self.map_msg=OccupancyGrid()
-        self.odom_msg=Odometry()
-        self.is_map=False
-        self.is_odom=False
-        self.is_found_path=False
-        self.is_grid_update=False
+        self.map_msg = OccupancyGrid()
+        self.odom_msg = Odometry()
+        self.is_map = False
+        self.is_odom = False
+        self.is_found_path = False
+        self.is_grid_update = False
 
 
         # 로직 2. 파라미터 설정
         self.goal = [184,224] 
-        self.map_size_x=350
-        self.map_size_y=350
-        self.map_resolution=0.05
-        self.map_offset_x=-8-8.75
-        self.map_offset_y=-4-8.75
+        self.map_size_x = 350
+        self.map_size_y = 350
+        self.map_resolution = 0.05
+        self.map_offset_x = -8 - 8.75
+        self.map_offset_y = -4 - 8.75
     
-        self.GRIDSIZE=350 
+        self.GRIDSIZE = 350 
  
         self.dx = [-1,0,0,1,-1,-1,1,1]
         self.dy = [0,1,-1,0,-1,1,-1,1]
-        self.dCost = [1,1,1,1,1.414,1.414,1.414,1.414]
+        self.dCost = [1,1,1,1,1.414,1.414,1.414,1.414] # 상하좌우, 대각선 cost
        
 
     def grid_update(self):
         self.is_grid_update=True
         '''
         로직 3. 맵 데이터 행렬로 바꾸기
-        map_to_grid=
-        self.grid=
         '''
+        map_to_grid = np.array(self.map_msg)
+        self.grid =  np.reshape(map_to_grid,(350, 350))
 
 
-    def pose_to_grid_cell(self,x,y):
+    def pose_to_grid_cell(self, x, y):
         map_point_x = 0
         map_point_y = 0
         '''
         로직 4. 위치(x,y)를 map의 grid cell로 변환 
-        (테스트) pose가 (-8,-4)라면 맵의 중앙에 위치하게 된다. 따라서 map_point_x,y 는 map size의 절반인 (175,175)가 된다.
-        pose가 (-16.75,12.75) 라면 맵의 시작점에 위치하게 된다. 따라서 map_point_x,y는 (0,0)이 된다.
-        map_point_x= ?
-        map_point_y= ?
+        (테스트) pose가 (-8, -4)라면 맵의 중앙에 위치하게 된다. 따라서 map_point_x,y 는 map size의 절반인 (175,175)가 된다.
+        pose가 (-16.75, -12.75) 라면 맵의 시작점에 위치하게 된다. 따라서 map_point_x,y는 (0,0)이 된다.
         '''
+        map_point_x = int((x - self.map_offset_x) / self.map_resolution)
+        map_point_y = int((y - self.map_offset_y) / self.map_resolution)
         
-        return map_point_x,map_point_y
+        return map_point_x, map_point_y
 
 
     def grid_cell_to_pose(self,grid_cell):
@@ -101,8 +101,8 @@ class a_star(Node):
 
 
     def map_callback(self,msg):
-        self.is_map=True
-        self.map_msg=msg
+        self.is_map = True
+        self.map_msg = msg
         
 
     def goal_callback(self,msg):
