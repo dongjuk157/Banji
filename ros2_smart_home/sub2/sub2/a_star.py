@@ -7,6 +7,7 @@ from squaternion import Quaternion
 from nav_msgs.msg import Odometry,OccupancyGrid,MapMetaData,Path
 from math import pi,cos,sin
 from collections import deque
+from heapq import heappop, heappush
 
 # a_star 노드는  OccupancyGrid map을 받아 grid map 기반 최단경로 탐색 알고리즘을 통해 로봇이 목적지까지 가는 경로를 생성하는 노드입니다.
 # 로봇의 위치(/pose), 맵(/map), 목표 위치(/goal_pose)를 받아서 전역경로(/global_path)를 만들어 줍니다. 
@@ -51,18 +52,18 @@ class a_star(Node):
     
         self.GRIDSIZE = 350 
  
-        self.dx = [-1,0,0,1,-1,-1,1,1]
-        self.dy = [0,1,-1,0,-1,1,-1,1]
-        self.dCost = [1,1,1,1,1.414,1.414,1.414,1.414] # 상하좌우, 대각선 cost
+        self.dx = [-1, 0, 0, 1, -1, -1, 1, 1]
+        self.dy = [0, 1, -1, 0, -1, 1, -1, 1]
+        self.dCost = [1, 1, 1, 1, 1.414, 1.414, 1.414, 1.414] 
        
 
     def grid_update(self):
-        self.is_grid_update=True
+        self.is_grid_update = True
         '''
         로직 3. 맵 데이터 행렬로 바꾸기
         '''
-        map_to_grid = np.array(self.map_msg)
-        self.grid =  np.reshape(map_to_grid,(350, 350))
+        map_to_grid = np.array(self.map_msg.data)
+        self.grid =  np.reshape(map_to_grid, (350, 350), order='F')
 
 
     def pose_to_grid_cell(self, x, y):
@@ -70,34 +71,35 @@ class a_star(Node):
         map_point_y = 0
         '''
         로직 4. 위치(x,y)를 map의 grid cell로 변환 
+        map_size, map_offset, map_resolution을 이용 -> map_size는 어디에?
         (테스트) pose가 (-8, -4)라면 맵의 중앙에 위치하게 된다. 따라서 map_point_x,y 는 map size의 절반인 (175,175)가 된다.
         pose가 (-16.75, -12.75) 라면 맵의 시작점에 위치하게 된다. 따라서 map_point_x,y는 (0,0)이 된다.
         '''
+        # grid 안에 들어가야하므로 int 형태로 반환
         map_point_x = int((x - self.map_offset_x) / self.map_resolution)
         map_point_y = int((y - self.map_offset_y) / self.map_resolution)
         
         return map_point_x, map_point_y
 
 
-    def grid_cell_to_pose(self,grid_cell):
-
+    def grid_cell_to_pose(self, grid_cell):
         x = 0
         y = 0
         '''
         로직 5. map의 grid cell을 위치(x,y)로 변환
+        map_size, map_offset, map_resolution을 이용 -> map_size는 어디에?
         (테스트) grid cell이 (175,175)라면 맵의 중앙에 위치하게 된다. 따라서 pose로 변환하게 되면 맵의 중앙인 (-8,-4)가 된다.
-        grid cell이 (350,350)라면 맵의 제일 끝 좌측 상단에 위치하게 된다. 따라서 pose로 변환하게 되면 맵의 좌측 상단인 (0.75,6.25)가 된다.
-
-        x=?
-        y=?
-
+        grid cell이 (350,350)라면 맵의 제일 끝 좌측 상단에 위치하게 된다. 따라서 pose로 변환하게 되면 맵의 좌측 상단인 (0.75, 4.75)가 된다.
         '''
-        return [x,y]
+        x = grid_cell[0] * self.map_resolution + self.map_offset_x
+        y = grid_cell[1] * self.map_resolution + self.map_offset_y
+
+        return [x, y]
 
 
-    def odom_callback(self,msg):
-        self.is_odom=True
-        self.odom_msg=msg
+    def odom_callback(self, msg):
+        self.is_odom = True
+        self.odom_msg = msg
 
 
     def map_callback(self,msg):
@@ -105,83 +107,90 @@ class a_star(Node):
         self.map_msg = msg
         
 
-    def goal_callback(self,msg):
-        
-        if msg.header.frame_id=='map':
+    def goal_callback(self, msg):
+
+        if msg.header.frame_id == 'map':
             '''
             로직 6. goal_pose 메시지 수신하여 목표 위치 설정
-            goal_x=
-            goal_y=
-            goal_cell=
-            self.goal = 
             '''             
-            print(msg)
+            goal_x = msg.pose.position.x
+            goal_y = msg.pose.position.y
+            goal_cell = self.pose_to_grid_cell(goal_x, goal_y)
+            self.goal = [goal_cell[0], goal_cell[1]]
+            print(goal_cell, self.goal)
             
 
-            if self.is_map ==True and self.is_odom==True  :
-                if self.is_grid_update==False :
-                    self.grid_update()
-
+            if self.is_map == True and self.is_odom == True  :
+                if self.is_grid_update == False :
+                    self.grid_update() # 로직 3. 맵 데이터 행렬로 바꾸기
         
-                self.final_path=[]
+                self.final_path = [] # 목적지까지 경로가 저장될 배열
 
-                x=self.odom_msg.pose.pose.position.x
-                y=self.odom_msg.pose.pose.position.y
-                start_grid_cell=self.pose_to_grid_cell(x,y)
+                x = self.odom_msg.pose.pose.position.x
+                y = self.odom_msg.pose.pose.position.y
+                start_grid_cell = self.pose_to_grid_cell(x, y)
 
                 self.path = [[0 for col in range(self.GRIDSIZE)] for row in range(self.GRIDSIZE)]
-                self.cost = np.array([[self.GRIDSIZE*self.GRIDSIZE for col in range(self.GRIDSIZE)] for row in range(self.GRIDSIZE)])
+                self.cost = np.array([[self.GRIDSIZE * self.GRIDSIZE for col in range(self.GRIDSIZE)] for row in range(self.GRIDSIZE)])
 
                 
                 # 다익스트라 알고리즘을 완성하고 주석을 해제 시켜주세요. 
                 # 시작지, 목적지가 탐색가능한 영역이고, 시작지와 목적지가 같지 않으면 경로탐색을 합니다.
-                # if self.grid[start_grid_cell[0]][start_grid_cell[1]] ==0  and self.grid[self.goal[0]][self.goal[1]] ==0  and start_grid_cell != self.goal :
-                #     self.dijkstra(start_grid_cell)
-
-
-                self.global_path_msg=Path()
-                self.global_path_msg.header.frame_id='map'
-                for grid_cell in reversed(self.final_path) :
-                    tmp_pose=PoseStamped()
-                    waypoint_x,waypoint_y=self.grid_cell_to_pose(grid_cell)
-                    tmp_pose.pose.position.x=waypoint_x
-                    tmp_pose.pose.position.y=waypoint_y
-                    tmp_pose.pose.orientation.w=1.0
+                if self.grid[start_grid_cell[0]][start_grid_cell[1]] == 0 and self.grid[self.goal[0]][self.goal[1]] == 0  and start_grid_cell != self.goal :
+                    self.dijkstra(start_grid_cell)
+                
+                # 경로가 있는 경우 global_path publish
+                self.global_path_msg = Path()
+                self.global_path_msg.header.frame_id = 'map'
+                for grid_cell in reversed(self.final_path):
+                    tmp_pose = PoseStamped()
+                    waypoint_x,waypoint_y = self.grid_cell_to_pose(grid_cell)
+                    tmp_pose.pose.position.x = waypoint_x
+                    tmp_pose.pose.position.y = waypoint_y
+                    tmp_pose.pose.orientation.w = 1.0
                     self.global_path_msg.poses.append(tmp_pose)
-            
-                if len(self.final_path)!=0 :
+                # print(len(self.final_path))
+                if len(self.final_path) != 0 :
                     self.a_star_pub.publish(self.global_path_msg)
+                    
 
-    def dijkstra(self,start):
-        Q = deque()
-        Q.append(start)
+    def dijkstra(self, start):
+        # a_star: f(x) = g(x) + h(x)
+        # dijkstra: f(x) = g(x)
+        hq = []
+        heappush(hq, (1, start))
         self.cost[start[0]][start[1]] = 1
         found = False
         '''
         로직 7. grid 기반 최단경로 탐색
-        
-        while ??:
-            if ??:
-                ??
-
-            current =??
+        '''       
+        while hq:
+            cur_cost, cur_node = heappop(hq)
+            if cur_node == self.goal:
+                break
 
             for i in range(8):
-                next = ??
-                if next[0] >= 0 and next[1] >= 0 and next[0] < self.GRIDSIZE and next[1] < self.GRIDSIZE:
-                        if self.grid[next[0]][next[1]] < 50:
-                            if ??:
-                                Q.??
-                                self.path[next[0]][next[1]] = ???
-                                self.cost[next[0]][next[1]] = ???
+                next_node = (cur_node[0] + self.dx[i], cur_node[1] + self.dy[i])
 
-        node = ??
-        while ?? 
-            nextNode = ??
-            self.final_path.??
-            node = ??
-        '''       
-        
+                if 0 <= next_node[0] < self.GRIDSIZE and 0 <= next_node[1] < self.GRIDSIZE:
+                    if self.grid[next_node[0]][next_node[1]] < 50:
+                        g = self.cost[cur_node[0]][cur_node[1]] + self.dCost[i]
+                        h = abs(self.goal[0] - next_node[0]) + abs(self.goal[1] - next_node[1])
+                        next_cost = self.cost[next_node[0]][next_node[1]]
+                        if g + h < next_cost:                                 # 값 비교
+                            heappush(hq, (g + h, next_node))                  # 우선순위 큐에 삽입
+                            self.path[next_node[0]][next_node[1]] = cur_node  # 현재 노드를 가리키게 만듦
+                            self.cost[next_node[0]][next_node[1]] = g + h     # cost 갱신
+
+        # 도착점부터 시작점까지 되돌아가면서 경로 저장
+        node = self.goal
+        # print("start")
+        while node != start:
+            if type(self.path) == type(int):
+                break
+            nextNode = self.path[node[0]][node[1]]
+            self.final_path.append(node)
+            node = nextNode
 
         
 def main(args=None):
