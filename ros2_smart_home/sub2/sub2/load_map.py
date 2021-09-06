@@ -36,13 +36,8 @@ class loadMap(Node):
         self.map_resolution=0.05
         self.map_offset_x=-8-8.75
         self.map_offset_y=-4-8.75
-        self.map_data = [0 for i in range(self.map_size_x*self.map_size_y)]
-        grid=np.array(self.map_data)
-        grid=np.reshape(grid,(350, 350))
 
         self.map_msg.header.frame_id="map"
-
-   
 
         m = MapMetaData()
         m.resolution = self.map_resolution
@@ -55,43 +50,35 @@ class loadMap(Node):
         self.map_meta_data = m
         self.map_msg.info=self.map_meta_data
         
-        '''
-        로직 2. 맵 데이터 읽고, 2차원 행렬로 변환
-
-        full_path=
-        self.f=
         
-        line=
-        line_data=
-        
-        for num,data in enumerate(line_data) :
-            self.map_data[num]=
-   
-        map_to_grid=
-        grid=
-        '''
+        # 로직 2. 맵 데이터 읽고, 2차원 행렬로 변환
+        pkg_path = os.getcwd()
+        back_folder = '..'
+        folder_name = 'map'
+        file_name = 'map.txt'
+        file_path = os.path.join(pkg_path, back_folder, folder_name, file_name)
 
+        with open(file_path, 'r') as f:
 
-        for y in range(350):
-            for x in range(350):
-                if grid[x][y]==100 :
+            line = f.readline()
+            line_data = line.split()
 
-                    '''
-                    로직 3. 점유영역 근처 필터처리
+            self.map_data = [int(line_data[num]) for num in range(self.map_size_x * self.map_size_y)]
+            grid = np.array(self.map_data)
+            grid = np.reshape(grid, (350, 350))
 
-                    채워 넣기
+            # x, y는 각각 열, 행을 의미한는가?
+            for row in range(350):
+                for col in range(350):
+                    if grid[row][col] == 100:
 
-                    '''
+                        # 로직 3. 점유영역 근처 필터처리
+                        pass
+            np_map_data = grid.reshape(1, 350*350) 
+            list_map_data = np_map_data.tolist()
 
-        
-        np_map_data=grid.reshape(1,350*350) 
-        list_map_data=np_map_data.tolist()
-   
-   
-        ## 로직2를 완성하고 주석을 해제 시켜주세요.
-        ## self.f.close()
-        print('read_complete')
-        self.map_msg.data=list_map_data[0]
+            print('read_complete')
+        self.map_msg.data = list_map_data[0]
 
 
     def timer_callback(self):
