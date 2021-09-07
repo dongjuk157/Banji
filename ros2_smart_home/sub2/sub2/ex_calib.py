@@ -381,6 +381,9 @@ class SensorCalib(Node):
         self.img = 
 
         """
+        np_arr = np.frombuffer(msg.data, dtype=np.uint8)
+
+        self.img = cv2.imdecode(np_arr, cv2.IMREAD_COLOR)
 
     def scan_callback(self, msg):
     
