@@ -61,11 +61,11 @@ class loadMap(Node):
 
             self.map_data = [int(line_data[num]) for num in range(self.map_size_x * self.map_size_y)]
             grid = np.array(self.map_data)
-            grid = np.reshape(grid, (350, 350))
+            grid = np.reshape(grid, (self.map_size_x, self.map_size_y))
 
             # x, y는 각각 열, 행을 의미한는가?
-            for row in range(350):
-                for col in range(350):
+            for row in range(self.map_size_x):
+                for col in range(self.map_size_y):
                     if grid[row][col] == 100:
 
                         # 로직 3. 점유영역 근처 필터처리
@@ -75,7 +75,7 @@ class loadMap(Node):
                                 if 0 <= row + dr < self.map_size_x and 0 <= col + dc < self.map_size_y and grid[row + dr][col + dc] < 80:
                                     grid[row + dr][col + dc] = 127
 
-            np_map_data = grid.reshape(1, 350*350) 
+            np_map_data = grid.reshape(1, self.map_size_x * self.map_size_y) 
             list_map_data = np_map_data.tolist()
 
             print('read_complete')
