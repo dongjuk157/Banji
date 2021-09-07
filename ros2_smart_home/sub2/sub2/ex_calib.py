@@ -114,6 +114,7 @@ def transformMTX_lidar2cam(params_lidar, params_cam):
     cam_pos = 
 
     """
+    # numpy는 radian을 사용하기 때문에 degree로 들어온 각도를 변환해준다.
     lidar_yaw, lidar_pitch, lidar_roll = [np.deg2rad(
         params_lidar.get(i)) for i in (["YAW", "PITCH", "ROLL"])]
     cam_yaw, cam_pitch, cam_roll = [np.deg2rad(
@@ -122,17 +123,17 @@ def transformMTX_lidar2cam(params_lidar, params_cam):
     # Relative position of lidar w.r.t cam
     lidar_pos = [params_lidar.get(i) for i in (["X", "Y", "Z"])]
     cam_pos = [params_cam.get(i) for i in (["X", "Y", "Z"])]
-    print('lidar_yaw: {}, lidar_pitch: {}, lidar_roll: {},\ncam_yaw: {}, cam_pitch: {}, cam_roll: {}'.format(
-        lidar_yaw, lidar_pitch, lidar_roll, cam_yaw, cam_pitch, cam_roll))
-    print('lidar_pos: {}, cam_pos: {}'.format(lidar_pos, cam_pos))
-    
-
     """
 
     로직 2. 라이다에서 카메라 까지 변환하는 translation 행렬을 정의
     Tmtx = 
 
     """
+    # 라이다 좌표에서 카메라 좌표를 빼면 카메라 기준 좌표에서 보는 x,y,z 값이 된다.
+    x_rel = lidar_pos[0] - cam_pos[0]
+    y_rel = lidar_pos[1] - cam_pos[1]
+    z_rel = lidar_pos[2] - cam_pos[2]
+
 
     """
     로직 3. 카메라의 자세로 맞춰주는 rotation 행렬을 정의
@@ -140,6 +141,11 @@ def transformMTX_lidar2cam(params_lidar, params_cam):
     Rmtx = 
 
     """
+    R_T = np.matmul(rotationMtx(lidar_yaw, lidar_pitch, lidar_roll).T,
+                    translationMtx(x_rel, y_rel, z_rel).T)
+    R_T = np.matmul(R_T, rotationMtx(cam_yaw, cam_pitch, cam_roll))
+    R_T = np.matmul(R_T, rotationMtx(np.deg2rad(-90.), 0., 0.))
+    R_T = np.matmul(R_T, rotationMtx(0, 0., np.deg2rad(-90.)))
 
     """
 
@@ -147,6 +153,7 @@ def transformMTX_lidar2cam(params_lidar, params_cam):
     RT = 
 
     """
+    R_T = R_T.T
 
     """
     테스트
@@ -182,8 +189,8 @@ def transformMTX_lidar2cam(params_lidar, params_cam):
     [ 0.00000000e+00  0.00000000e+00  0.00000000e+00  1.00000000e+00]]
 
     """
-
-    return np.eye(4)
+    return R_T
+    # return np.eye(4)
 
 
 def project2img_mtx(params_cam):
