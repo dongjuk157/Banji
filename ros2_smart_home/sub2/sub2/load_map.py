@@ -34,8 +34,8 @@ class loadMap(Node):
         self.map_size_x=350 
         self.map_size_y=350
         self.map_resolution=0.05
-        self.map_offset_x=-8-8.75
-        self.map_offset_y=-4-8.75
+        self.map_offset_x=-8 - self.map_size_x / 2 * self.map_resolution
+        self.map_offset_y=-4 - self.map_size_y / 2 * self.map_resolution
 
         self.map_msg.header.frame_id="map"
 
@@ -63,17 +63,19 @@ class loadMap(Node):
             grid = np.array(self.map_data)
             grid = np.reshape(grid, (self.map_size_x, self.map_size_y))
 
-            # x, y는 각각 열, 행을 의미한는가?
-            for row in range(self.map_size_x):
-                for col in range(self.map_size_y):
-                    if grid[row][col] == 100:
+            # x, y는 각각 열, 행을 의미한다.
+            # 전제) map 데이터를 그냥 reshape할 경우이다.
+            # x(열) 데이터는 index 0 에 가장 우측 데이터가 있고 last index 에 가장 좌측 데이터가 들어있는 역방향이다.
+            for y in range(self.map_size_x):
+                for x in range(self.map_size_y):
+                    if grid[y][x] == 100:
 
                         # 로직 3. 점유영역 근처 필터처리
                         # 5*5 기준이 정확히 어떻게 되는가?
-                        for dr in range(-5, 6):
-                            for dc in range(-5, 6):
-                                if 0 <= row + dr < self.map_size_x and 0 <= col + dc < self.map_size_y and grid[row + dr][col + dc] < 80:
-                                    grid[row + dr][col + dc] = 127
+                        for dy in range(-5, 6):
+                            for dx in range(-5, 6):
+                                if 0 <= x + dx < self.map_size_x and 0 <= y + dy < self.map_size_y and grid[y + dy][x + dx] < 80:
+                                    grid[y + dy][x + dx] = 127
 
             np_map_data = grid.reshape(1, self.map_size_x * self.map_size_y) 
             list_map_data = np_map_data.tolist()
