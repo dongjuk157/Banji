@@ -4,3 +4,10 @@
   - https://drive.google.com/drive/folders/1rp54qL31ZIoHet7A9BlvpoDCCdGVsvLK?usp=sharing
 
 (위 경로에 위치한 프로그램 및 문서는 SSAFY 과정 내에서만 사용할 수 있으며 무단 복제 및 반출, 배포를 금합니다.)
+
+---
+
+프로젝트 관련 정리
+
+[동건](./study/sub2_dg.md)
+
