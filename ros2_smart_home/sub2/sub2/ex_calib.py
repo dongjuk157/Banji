@@ -210,12 +210,17 @@ def project2img_mtx(params_cam):
     fc_x = 
     fc_y = 
     """
+    fc_x = params_cam["HEIGHT"]/(2*np.tan(np.deg2rad(params_cam["FOV"]/2)))
+    fc_y = params_cam["HEIGHT"]/(2*np.tan(np.deg2rad(params_cam["FOV"]/2)))
+
 
     """
     로직 2. 카메라의 파라메터로 이미지 프레임 센터를 계산.
     cx = 
     cy = 
     """
+    cx = params_cam["WIDTH"]/2
+    cy = params_cam["HEIGHT"]/2
 
     """
 
@@ -223,6 +228,9 @@ def project2img_mtx(params_cam):
     R_f =
 
     """
+    R_f = np.array([[fc_x,  0,      cx],
+                    [0,     fc_y,   cy]])
+
 
     """
     테스트
@@ -246,7 +254,8 @@ def project2img_mtx(params_cam):
     [  0.         207.84609691 120.        ]]
     """
 
-    return np.zeros((2,3))
+    return R_f
+    # return np.zeros((2,3))
 
 
 def draw_pts_img(img, xi, yi):
