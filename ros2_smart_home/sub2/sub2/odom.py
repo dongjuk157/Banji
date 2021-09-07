@@ -63,6 +63,18 @@ class odom(Node):
         self.laser_transform.transform.translation.z = 
         self.laser_transform.transform.rotation.w = 
         '''
+        self.odom_msg.header.frame_id = 'map'
+        self.odom_msg.child_frame_id = 'base_link'
+
+        self.base_link_transform.header.frame_id = 'map'
+        self.base_link_transform.child_frame_id = 'base_link'
+
+        self.laser_transform.header.frame_id = 'base_link'
+        self.laser_transform.child_frame_id = 'laser'
+        self.laser_transform.transform.translation.x = 0.0
+        self.laser_transform.transform.translation.y = 0.0
+        self.laser_transform.transform.translation.z = 1.0
+        self.laser_transform.transform.rotation.w = 1.0
     
 
     def listener_callback(self, msg):
@@ -87,7 +99,12 @@ class odom(Node):
             self.x+=
             self.y+=
             self.theta+=
-            '''              
+            '''   
+            # 절대위치 사용
+            self.x += linear_x * cos(self.theta) * self.period
+            self.y += linear_x * sin(self.theta) * self.period
+            self.theta += angular_z * self.period 
+                      
             self.base_link_transform.header.stamp =rclpy.clock.Clock().now().to_msg()
             self.laser_transform.header.stamp =rclpy.clock.Clock().now().to_msg()
             
