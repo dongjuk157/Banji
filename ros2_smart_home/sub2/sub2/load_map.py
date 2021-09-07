@@ -52,7 +52,8 @@ class loadMap(Node):
         
         
         # 로직 2. 맵 데이터 읽고, 2차원 행렬로 변환
-        pkg_path = os.getcwd()
+        pkg_path = os.getcwd() # 실행되는 터미널의 경로를 가져온다.
+        # pkg_path = os.path.dirname(os.path.realpath(__file__))
         back_folder = '..'
         folder_name = 'map'
         file_name = 'map.txt'
