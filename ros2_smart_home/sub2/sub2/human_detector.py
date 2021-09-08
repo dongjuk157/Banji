@@ -19,22 +19,21 @@ from ssafy_msgs.msg import BBox
 
 
 def non_maximum_supression(bboxes, threshold=0.5):
-
     """
     non maximum supression 로직
     로직 1 : bounding box 크기 역순으로 sort
     로직 2 : new_bboxes 리스트 정의 후 첫 bbox save
     로직 3 : 기존 bbox 리스트에 첫 bbox delete
     로직 4 : 두 bbox의 겹치는 영역을 구해서, 영역이 안 겹칠때 new_bbox로 save
-    """    
-    # 로직 1 : bounding box 크기 역순으로 sort   
+    """
+    # 로직 1 : bounding box 크기 역순으로 sort
     bboxes = sorted(bboxes, key=lambda detections: detections[3],
-            reverse=True)
-    new_bboxes=[]
-    
+                    reverse=True)
+    new_bboxes = []
+
     # 로직 2 : new_bboxes 리스트 정의 후 첫 bbox save
     new_bboxes.append(bboxes[0])
-    
+
     # 로직 3 : 기존 bbox 리스트에 첫 bbox delete
     bboxes.pop(0)
 
@@ -50,7 +49,7 @@ def non_maximum_supression(bboxes, threshold=0.5):
             y2_tl = new_bbox[1]
             y1_br = bbox[1] + bbox[3]
             y2_br = new_bbox[1] + new_bbox[3]
-            
+
             """
             # 로직 4 : 두 bbox의 겹치는 영역을 구해서, 영역이 안 겹칠때 new_bbox로 save
             x_overlap = 
@@ -68,9 +67,29 @@ def non_maximum_supression(bboxes, threshold=0.5):
                 new_bboxes.append(bbox)
 
             """
+            x_len = (x1_br if x1_br > x2_br else x2_br) - \
+                (x1_tl if x1_tl < x2_tl else x2_tl)
+            x_overlap = (bbox[2] + new_bbox[2]) - x_len
+            x_overlap = x_overlap if x_overlap > 0 else 0
+            y_len = (y1_br if y1_br > y2_br else y2_br) - \
+                (y1_tl if y1_tl < y2_tl else y2_tl)
+            y_overlap = (bbox[3] + new_bbox[3]) - y_len
+            y_overlap = y_overlap if y_overlap > 0 else 0
+            overlap_area = x_overlap * y_overlap
 
+            area_1 = bbox[2] * bbox[3]
+            area_2 = new_bbox[2] * new_bbox[3]
+
+            total_area = area_1 + area_2 - overlap_area
+            overlap_area = overlap_area / float(total_area)
+            # print(f"total_area {total_area} , overlap_area {overlap_area}")
+            if overlap_area > threshold:
+                isNew = False
+                break
+
+        if isNew:
+            new_bboxes.append(bbox)
     return new_bboxes
-
 
 
 class HumanDetector(Node):
@@ -86,15 +105,16 @@ class HumanDetector(Node):
             1)
 
         self.img_bgr = None
-        
+
         self.timer_period = 0.03
 
         self.timer = self.create_timer(self.timer_period, self.timer_callback)
 
         self.bbox_pub_ = self.create_publisher(BBox, '/bbox', 1)
 
-        self.pedes_detector = cv2.HOGDescriptor()                              
-        self.pedes_detector.setSVMDetector(cv2.HOGDescriptor_getDefaultPeopleDetector())
+        self.pedes_detector = cv2.HOGDescriptor()
+        self.pedes_detector.setSVMDetector(
+            cv2.HOGDescriptor_getDefaultPeopleDetector())
 
         self.able_to_pub = True
 
@@ -103,16 +123,17 @@ class HumanDetector(Node):
         np_arr = np.frombuffer(msg.data, np.uint8)
 
         self.img_bgr = cv2.imdecode(np_arr, cv2.IMREAD_COLOR)
-  
+
     def detect_human(self, img_bgr):
-    
+
         self.bbox_msg = BBox()
-    
+
         # 로직 2 : image grayscale conversion
         img_pre = cv2.cvtColor(self.img_bgr, cv2.COLOR_BGR2GRAY)
 
         # 로직 3 : human detection 실행 후 bounding box 출력
-        (rects_temp, _) = self.pedes_detector.detectMultiScale(img_pre, winStride=(2, 2), padding=(8, 8), scale=2)
+        (rects_temp, _) = self.pedes_detector.detectMultiScale(
+            img_pre, winStride=(2, 2), padding=(8, 8), scale=2)
 
         if len(rects_temp) != 0:
 
@@ -149,21 +170,20 @@ class HumanDetector(Node):
 
             """
 
-            for (x,y,w,h) in rects:
+            for (x, y, w, h) in rects:
 
-                cv2.rectangle(img_bgr, (x,y),(x+w,y+h),(0,255,255), 2)
+                cv2.rectangle(img_bgr, (x, y), (x+w, y+h), (0, 255, 255), 2)
 
         else:
             # pass
             self.bbox_msg.num_bbox = len(rects_temp)
 
-
         """
         로직 7 : bbox 결과 show
         cv2.
         cv2.waitKey(1)
-        """           
-        cv2.imshow("detection result", img_bgr)        
+        """
+        cv2.imshow("detection result", img_bgr)
         cv2.waitKey(1)
 
     def timer_callback(self):
@@ -178,6 +198,7 @@ class HumanDetector(Node):
         else:
             pass
 
+
 def main(args=None):
 
     rclpy.init(args=args)
@@ -186,7 +207,7 @@ def main(args=None):
 
     rclpy.spin(hdetector)
 
+
 if __name__ == '__main__':
 
     main()
-
