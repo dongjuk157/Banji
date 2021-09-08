@@ -295,7 +295,7 @@ class LIDAR2CAMTransform:
 
     def transform_lidar2cam(self, xyz_p):
         
-        xyz_c = xyz_p
+        # xyz_c = xyz_p
         
         """
         
@@ -304,6 +304,9 @@ class LIDAR2CAMTransform:
         xyz_c = 
         
         """
+        xyz_c = np.matmul(np.concatenate(
+            [xyz_p, np.ones((xyz_p.shape[0], 1))], axis=1), self.RT.T)
+
         return xyz_c
 
     def project_pts2img(self, xyz_c, crop=True):
@@ -315,10 +318,19 @@ class LIDAR2CAMTransform:
         xn, yn = 
 
         """
+        xyz_c = xyz_c.T
+
+        xc, yc, zc = xyz_c[0, :].reshape(
+            [1, -1]), xyz_c[1, :].reshape([1, -1]), xyz_c[2, :].reshape([1, -1])
+        xn, yn = xc/(zc+0.0001), yc/(zc+0.0001)
         
         # 로직 4. normalizing plane 상의 라이다 포인트들에 proj_mtx를 곱해 픽셀 좌표값 계산.
 
         # xyi = np.matmul(self.proj_mtx, np.concatenate([xn, yn, np.ones_like(xn)], axis=0))
+        xyi = np.matmul(self.proj_mtx, np.concatenate(
+            [xn, yn, np.ones_like(xn)], axis=0))
+
+        xyi = xyi[0:2, :].T
 
         """
         로직 5. 이미지 프레임 밖을 벗어나는 포인트들을 crop.
@@ -328,6 +340,11 @@ class LIDAR2CAMTransform:
         else:
             pass
         """
+        if crop:
+            xyi = self.crop_pts(xyi)
+        else:
+            pass
+
         return xyi
 
     def crop_pts(self, xyi):
