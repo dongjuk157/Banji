@@ -49,3 +49,28 @@
 
   ![image-20210907145222796](README.assets/image-20210907145222796.png)
 
+
+
+### ex_calib.py
+
+- 사용이유
+
+  카메라 - 거리 측정 불가
+
+  카메라 + 라이다 = 거리 측정 가능
+
+  카메라 - 2D / 라이다 - 3D : 좌표가 달라서 위치 파악이 안될 수 있음
+
+  https://eehoeskrap.tistory.com/511
+
+  
+
+- 초기 실행
+
+  ![image-20210908144731234](README.assets/image-20210908144731234.png)
+
+- 로직 1
+
+  cos / sin 계산시, deg => rad로 변환 후 계산
+
+  
