@@ -589,6 +589,116 @@ grayscale로 이진화된 이미지에서 윤곽선(edge)을 찾고,  findContou
 
 ### 4. ex_calib
 
+0. ex_calib 노드(SensorCalib)
+
+    ```python
+    class SensorCalib(Node):
+    
+        def __init__(self):
+            super().__init__(node_name='ex_calib')
+    
+            # 로직 1. 노드에 필요한 라이다와 카메라 topic의 subscriber 생성
+    
+            self.subs_scan = self.create_subscription(
+                LaserScan,
+                '/scan',
+                self.scan_callback, 10)
+    
+            self.subs_img = self.create_subscription(
+                CompressedImage,
+                '/image_jpeg/compressed',
+                self.img_callback,
+                10)
+    
+            # 로직 2. Params를 받아서 라이다 포인트를 카메라 이미지에 projection 하는
+            # transformation class 정의하기
+    
+            self.l2c_trans = LIDAR2CAMTransform(params_cam, params_lidar)
+    
+            self.timer_period = 0.1
+    
+            self.timer = self.create_timer(self.timer_period, self.timer_callback)
+    
+            self.xyz, self.R, self.intens = None, None, None
+            self.img = None
+    
+        def img_callback(self, msg):        
+            """
+            로직 3. 카메라 콜백함수에서 이미지를 클래스 내 변수로 저장.
+            frombuffer 
+            버퍼에 있는 데이터를 1차원 배열로 만들어 주는 기능
+            numpy.frombuffer(buffer, dtype = float, count = -1, offset = 0)
+            buffer - 데이터. 
+            dtype - 데이터 타입. 기본 값 float
+            count - 읽어올 데이터의 수. 기본 값 -1 (전체 값)
+            offset - 바이너리 값을 읽어올 시작 위치. 기본 값 0 
+            """
+            np_arr = np.frombuffer(msg.data, np.uint8)
+    
+            self.img = cv2.imdecode(np_arr, cv2.IMREAD_COLOR)
+    
+        def scan_callback(self, msg):    
+            """
+            로직 4. 라이다 2d scan data(거리와 각도)를 가지고 x,y 좌표계로 변환
+            linspace(start, end, num): start에서 end까지의 값을 num 개 만큼 출력 
+            360개 이므로 0도부터 359도 까지 저장
+            """
+            self.R = np.array(msg.ranges)
+    
+            x = self.R * np.cos(np.linspace(0, 2 * np.pi, 360))
+            y = self.R * np.sin(np.linspace(0, 2 * np.pi, 360))
+            z = np.zeros_like(x)
+    
+            self.xyz = np.concatenate([
+                x.reshape([-1, 1]),
+                y.reshape([-1, 1]),
+                z.reshape([-1, 1])
+            ], axis=1)
+    
+        def timer_callback(self):
+    
+            if self.xyz is not None and self.img is not None :
+    
+                """
+                로직 5. 라이다 x, y 좌표 데이터 중 정면 부분만 crop
+                np.where: 조건에 맞는 데이터찾기 
+                """
+                xyz_p = self.xyz[np.where(self.xyz[:, 0] >= 0)]
+                
+                """
+                로직 6. transformation class 의 transform_lidar2cam 로 카메라 3d 좌표 변환
+                """
+                xyz_c = self.l2c_trans.transform_lidar2cam(xyz_p)
+    
+                """
+                로직 7. transformation class 의 project_pts2img로 카메라 프레임으로 정사영
+                """
+                xy_i = self.l2c_trans.project_pts2img(xyz_c, crop=True)
+    
+                """
+                로직 8. draw_pts_img()로 카메라 이미지에 라이다 포인트를 draw 하고 show
+                """
+                
+                img_l2c = draw_pts_img(self.img, 
+                                        xy_i[:, 0].astype(np.int32),
+                                        xy_i[:, 1].astype(np.int32))
+    
+                cv2.imshow("Lidar2Cam", img_l2c)
+    
+                cv2.waitKey(1)
+    
+            else:
+    
+                print("waiting for msg")
+                if self.xyz is None:
+                    print("self.xyz: ", self.xyz)
+                if self.img is None:
+                    print("self.img: ", self.img)
+                pass
+    ```
+
+    
+
 1. transformMTX_lidar2cam
 
    ```python
@@ -637,7 +747,109 @@ grayscale로 이진화된 이미지에서 윤곽선(edge)을 찾고,  findContou
 
 2. project2img_mtx
 
+   ```python
+   def project2img_mtx(params_cam):
+       """
+       로직 1. params에서 카메라의 width, height, fov를 가져와서 focal length를 계산.
+       제공되는 카메라의 fov는 수직 방향이므로 height을 사용함
+       """
+   
+       fov = math.radians(params_cam['FOV'])    #radian으로 바꿔서 사용
+       width = params_cam['WIDTH']
+       height = params_cam['HEIGHT']
+       fc_x = height / (2 * math.tan(fov/2))
+       fc_y = height / (2 * math.tan(fov/2))
+   
+       """
+       로직 2. 카메라의 파라메터로 이미지 프레임 센터를 계산.
+       이미지 가로세로의 1/2
+       """
+       cx = width / 2
+       cy = height /2
+   
+       """
+       로직 3. Projection 행렬을 계산.
+       """
+       R_f = np.array([
+           [fc_x, 0, cx], 
+           [0, fc_y, cy]
+       ])
+       
+   	return R_f
+   ```
+
+   
+
 3. LIDAR2CAMTransform
+
+   ```python
+   class LIDAR2CAMTransform:
+       def __init__(self, params_cam, params_lidar):
+           # 로직 1. Params에서 필요한 파라메터들과 RT 행렬, projection 행렬 등을 정의
+           self.width = params_cam["WIDTH"]
+           self.height = params_cam["HEIGHT"]
+   
+           self.n = float(params_cam["WIDTH"])
+           self.m = float(params_cam["HEIGHT"])
+   
+           self.RT = transformMTX_lidar2cam(params_lidar, params_cam)
+   
+           self.proj_mtx = project2img_mtx(params_cam)
+   
+       def transform_lidar2cam(self, xyz_p):
+           """
+           로직 2. 클래스 내 self.RT로 라이다 포인트들을 카메라 좌표계로 변환시킨다.
+           """
+           xyz_c = xyz_p
+           # xyz_c = np.matmul(self.RT, np.array([*xyz_c, 1]).transpose())
+           
+           xyz_c = np.matmul(self.RT, np.concatenate([xyz_c, np.ones((xyz_c.shape[0], 1))], axis=1).transpose())
+   
+           return xyz_c
+   
+       def project_pts2img(self, xyz_c, crop=True):
+           xyi = np.zeros((xyz_c.shape[0], 2))
+   
+           """
+           로직 3. RT로 좌표 변환된 포인트들의 normalizing plane 상의 위치를 계산.
+           np.array 의 indexing => array[row, col] row나 col에 -1이 들어가는 경우 나머지(각각 col, row) 값만 채워주면 자동으로 지정
+           """
+           xc, yc, zc = xyz_c[0, :].reshape([1, -1]), xyz_c[1, :].reshape([1, -1]), xyz_c[2, :].reshape([1, -1])
+           xn, yn = xc / (zc + 0.0001), yc / (zc + 0.0001)
+           
+           # 로직 4. normalizing plane 상의 라이다 포인트들에 proj_mtx를 곱해 픽셀 좌표값 계산.
+   
+           xyi = np.matmul(self.proj_mtx, np.concatenate([xn, yn, np.ones_like(xn)], axis=0))
+           xyi = xyi[0:2, :].T
+           """ 
+           로직 5. 이미지 프레임 밖을 벗어나는 포인트들을 crop.
+           """
+           if crop:
+               xyi = self.crop_pts(xyi)
+           else:
+               pass
+           return xyi
+   
+       def crop_pts(self, xyi):
+   
+           xyi = xyi[np.logical_and(xyi[:, 0]>=0, xyi[:, 0]<self.width), :]
+           xyi = xyi[np.logical_and(xyi[:, 1]>=0, xyi[:, 1]<self.height), :]
+   
+           return xyi
+   ```
+
+4. 결과
+
+   ![Image Pasted at 2021-9-9 12-03](sub2_dg.assets/Image Pasted at 2021-9-9 12-03.png)
+   
+5. 오류
+
+   ![Image Pasted at 2021-9-9 11-24](sub2_dg.assets/Image Pasted at 2021-9-9 11-24.png)
+
+   - 투영이 되는거같은데 좌측에만 몰려있음
+   - `ex_calib.py`와 시뮬레이터의 parameter가 맞지 않아서 생기는 문제였다
+
+   
 
 ### 5. human_detector
 
