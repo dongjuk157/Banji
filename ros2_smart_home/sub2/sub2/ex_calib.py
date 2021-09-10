@@ -257,7 +257,6 @@ class LIDAR2CAMTransform:
     def __init__(self, params_cam, params_lidar):
 
         """
-
         LIDAR2CAMTransform 정의 및 기능 로직 순서
         1. Params를 입력으로 받아서 필요한 파라메터들과 RT 행렬, projection 행렬 등을 정의. 
         2. 클래스 내 self.RT로 라이다 포인트들을 카메라 좌표계로 변환.
@@ -279,56 +278,40 @@ class LIDAR2CAMTransform:
 
     def transform_lidar2cam(self, xyz_p):
         
-        # xyz_c = xyz_p
+        xyz_c = xyz_p
         
         """
-        
         로직 2. 클래스 내 self.RT로 라이다 포인트들을 카메라 좌표계로 변환시킨다.
-        
-        xyz_c = 
-        
         """
-        xyz_c = np.matmul(np.concatenate(
-            [xyz_p, np.ones((xyz_p.shape[0], 1))], axis=1), self.RT.T)
-
-        return xyz_c
+        # 4*4 매트릭스에 3차원 좌표를 곱하기 위해서 ones를 추가
+        xyz_c = np.matmul(self.RT, np.concatenate([xyz_c, np.ones((xyz_c.shape[0], 1))], axis=1).T)
+        
+        return xyz_c    # xyz_c : RT로 좌표 변환된 포인트들
 
     def project_pts2img(self, xyz_c, crop=True):
 
-        xyi=np.zeros((xyz_c.shape[0], 2))
+        xyi = np.zeros((xyz_c.shape[0], 2))
 
         """
         로직 3. RT로 좌표 변환된 포인트들의 normalizing plane 상의 위치를 계산.
-        xn, yn = 
-
         """
-        xyz_c = xyz_c.T
-
-        xc, yc, zc = xyz_c[0, :].reshape(
-            [1, -1]), xyz_c[1, :].reshape([1, -1]), xyz_c[2, :].reshape([1, -1])
-        xn, yn = xc/(zc+0.0001), yc/(zc+0.0001)
+        # xyz_c[0, :].reshape([1, -1]) : [[1 2 3] [4 5 6] [7 8 9]] 값이 있다면 [[1 2 3]] 값이 나온다.
+        xc, yc, zc = xyz_c[0, :].reshape([1, -1]), xyz_c[1, :].reshape([1, -1]), xyz_c[2, :].reshape([1, -1])
+        xn, yn = xc / (zc + 0.0001), yc / (zc + 0.0001)   # 분모에 0이 들어가지 않게 하기 위해서 0.0001을 더해준다.
         
         # 로직 4. normalizing plane 상의 라이다 포인트들에 proj_mtx를 곱해 픽셀 좌표값 계산.
 
-        # xyi = np.matmul(self.proj_mtx, np.concatenate([xn, yn, np.ones_like(xn)], axis=0))
-        xyi = np.matmul(self.proj_mtx, np.concatenate(
-            [xn, yn, np.ones_like(xn)], axis=0))
-
+        xyi = np.matmul(self.proj_mtx, np.concatenate([xn, yn, np.ones_like(xn)], axis=0))
         xyi = xyi[0:2, :].T
 
         """
         로직 5. 이미지 프레임 밖을 벗어나는 포인트들을 crop.
-
-        if crop:
-            xyi = 
-        else:
-            pass
         """
+
         if crop:
             xyi = self.crop_pts(xyi)
         else:
             pass
-
         return xyi
 
     def crop_pts(self, xyi):
@@ -338,7 +321,6 @@ class LIDAR2CAMTransform:
 
         return xyi
 
-    
 
 
 class SensorCalib(Node):
