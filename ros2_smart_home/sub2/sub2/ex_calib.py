@@ -395,8 +395,8 @@ class SensorCalib(Node):
 
             """
             로직 7. transformation class 의 project_pts2img로 카메라 프레임으로 정사영
-            xy_i = 
             """
+            xy_i = self.l2c_trans.project_pts2img(xyz_c, crop=True)
 
             """
             로직 8. draw_pts_img()로 카메라 이미지에 라이다 포인트를 draw 하고 show
