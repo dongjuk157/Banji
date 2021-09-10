@@ -390,8 +390,8 @@ class SensorCalib(Node):
 
             """
             로직 6. transformation class 의 transform_lidar2cam 로 카메라 3d 좌표 변환
-            xyz_c = 
             """
+            xyz_c = self.l2c_trans.transform_lidar2cam(xyz_p)
 
             """
             로직 7. transformation class 의 project_pts2img로 카메라 프레임으로 정사영
