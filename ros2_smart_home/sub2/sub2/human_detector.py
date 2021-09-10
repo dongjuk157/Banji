@@ -38,7 +38,6 @@ def non_maximum_supression(bboxes, threshold=0.5):
     bboxes.pop(0)
 
     for _, bbox in enumerate(bboxes):
-        isNew = True
         for new_bbox in new_bboxes:
 
             x1_tl = bbox[0]
@@ -83,12 +82,10 @@ def non_maximum_supression(bboxes, threshold=0.5):
             total_area = area_1 + area_2 - overlap_area
             overlap_area = overlap_area / float(total_area)
             # print(f"total_area {total_area} , overlap_area {overlap_area}")
-            if overlap_area > threshold:
-                isNew = False
-                break
-
-        if isNew:
-            new_bboxes.append(bbox)
+            if overlap_area < threshold:
+                #isNew = False
+                # break
+                new_bboxes.append(bbox)
     return new_bboxes
 
 
