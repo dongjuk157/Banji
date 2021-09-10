@@ -363,28 +363,14 @@ class SensorCalib(Node):
         self.img = cv2.imdecode(np_arr, cv2.IMREAD_COLOR)
 
     def scan_callback(self, msg):
+    
         """
-
         로직 4. 라이다 2d scan data(거리와 각도)를 가지고 x,y 좌표계로 변환
-
-        self.R = 
-
-        x = 
-        y = 
-        z = 
-
-        self.xyz = np.concatenate([
-            x.reshape([-1, 1]),
-            y.reshape([-1, 1]),
-            z.reshape([-1, 1])
-        ], axis=1)
-
         """
         self.R = np.array(msg.ranges)
-        self.intens = np.array(msg.intensities)
 
-        x = self.R*np.cos(np.linspace(0, 2*np.pi, 360))
-        y = self.R*np.sin(np.linspace(0, 2*np.pi, 360))
+        x = self.R * np.cos(np.linspace(0, 2 * np.pi, 360))
+        y = self.R * np.sin(np.linspace(0, 2 * np.pi, 360))
         z = np.zeros_like(x)
 
         self.xyz = np.concatenate([
