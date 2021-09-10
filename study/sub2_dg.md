@@ -853,11 +853,177 @@ grayscale로 이진화된 이미지에서 윤곽선(edge)을 찾고,  findContou
 
 ### 5. human_detector
 
-### 6. non_maximum_suppression
+0. human_detector
 
-### 7. seg_binarizer
+   ```python
+   class HumanDetector(Node):
+   
+       def __init__(self):
+           super().__init__(node_name='human_detector')
+   
+           # 로직 1 : 노드에 필요한 publisher, subscriber, descriptor, detector, timer 정의
+           self.subs_img = self.create_subscription(
+               CompressedImage,
+               '/image_jpeg/compressed',
+               self.img_callback,
+               1)
+   
+           self.img_bgr = None
+           self.timer_period = 0.03
+           self.timer = self.create_timer(self.timer_period, self.timer_callback)
+   
+           self.bbox_pub_ = self.create_publisher(BBox, '/bbox', 1)
+           self.pedes_detector = cv2.HOGDescriptor()                              
+           self.pedes_detector.setSVMDetector(cv2.HOGDescriptor_getDefaultPeopleDetector())
+   
+           self.able_to_pub = True
+   ```
 
-### 8. utils
+   - `__init__`의 `pedes_dectector = cv2.HOGDescriptor` 부분은 필수학습 부분의 `OpenCV HoG Desciptor` 확인
+
+   ```python
+       def detect_human(self, img_bgr):
+       
+           self.bbox_msg = BBox()
+       
+           # 로직 2 : image grayscale conversion
+           # HOG는 grayscale 이미지에 대해서 정의되어있으므로 변환
+           img_pre = cv2.cvtColor(self.img_bgr, cv2.COLOR_BGR2GRAY)
+   
+           # 로직 3 : human detection 실행 후 bounding box 출력
+           '''
+           foundLocations, foundWeights = cv2.HOGDescriptor.detectMultiScale(
+               img, # img: 입력 영상. cv2.CV_8UC1 또는 cv2.CV_8UC3.
+               hitThreshold=None, 
+               # hitThreshold: 특징 벡터와 SVM 분류 평면까지의 거리에 대한 임계값
+               winStride=None,
+               # winStride: 셀 윈도우 이동 크기. (0, 0) 지정 시 셀 크기와 같게 설정.
+               padding=None, # padding: 패딩 크기
+               scale=None, # scale: 검색 윈도우 크기 확대 비율. 기본값은 1.05.
+               finalThreshold=None,
+               # finalThreshold: 검출 결정을 위한 임계값
+               useMeanshiftGrouping=None
+               # useMeanshiftGrouping: 겹쳐진 검색 윈도우를 합치는 방법 지정 플래그
+           ) 
+           foundLocations: (출력) 검출된 사각형 영역 정보
+           foundWeights: (출력) 검출된 사각형 영역에 대한 신뢰도
+           '''
+           (rects_temp, _) = self.pedes_detector.detectMultiScale(
+               img_pre, winStride=(2, 2), padding=(8, 8), scale=2
+           )
+   
+           if len(rects_temp) != 0:
+   
+               # 로직 4 : non maximum supression으로 bounding box 정리
+               xl, yl, wl, hl = [], [], [], []
+               rects = non_maximum_supression(rects_temp)
+   
+               """
+               # 로직 5 : bbox를 ros msg 파일에 write
+               ## 각 bbox의 center, width, height의 꼭지점들을 리스트에 넣어 놓고
+               ## 메세지 내 x,y,w,h에 채워넣는 방식으로 하시면 됩니다.
+               """
+              
+               for (x, y, w, h) in rects:
+                   xl.append(int(x))
+                   yl.append(int(y))
+                   wl.append(int(w))
+                   hl.append(int(h))
+   
+               if self.able_to_pub:
+   
+                   self.bbox_msg.num_bbox = len(rects)
+   
+                   obj_list = rects
+   
+                   self.bbox_msg.idx_bbox = list(range(len(obj_list)))
+   
+                   self.bbox_msg.x = xl
+                   self.bbox_msg.y = yl
+                   self.bbox_msg.w = wl
+                   self.bbox_msg.h = hl
+   
+               # 로직 6 원본 이미지에 bbox 추가
+               for (x, y, w, h) in rects:
+                   cv2.rectangle(img_bgr, (x, y), (x + w, y + h), (0, 255, 255), 2)
+   
+           else:
+               # pass
+               self.bbox_msg.num_bbox = len(rects_temp)
+   ```
+
+   - `"The 'x' field must be a set or sequence and each value of type 'int' and each integer in [-32768, 32767]"`
+     `AssertionError: The 'x' field must be a set or sequence and each value of type 'int' and each integer in [-32768, 32767]` 이런 에러가 발생했다. bbox에 들어가는 x,y,w,h를 int로 넣어주는 것으로 해결.
+
+1. non_maximum_supression
+
+   ```python
+   def non_maximum_supression(bboxes, threshold=0.5):
+       # 로직 1 : bounding box 크기 역순으로 sort   
+       bboxes = sorted(bboxes, key=lambda detections: detections[3], reverse=True)
+       new_bboxes=[]
+       
+       # 로직 2 : new_bboxes 리스트 정의 후 첫 bbox save
+       new_bboxes.append(bboxes[0])
+       
+       # 로직 3 : 기존 bbox 리스트에 첫 bbox delete
+       bboxes.pop(0)
+       
+   
+       for _, bbox in enumerate(bboxes):
+   
+           for new_bbox in new_bboxes:
+               # tl: top-left, br: bottom-right
+               # 0: tl의 x좌표, 1: tl의 y좌표, 2: 가로길이, 3: 세로 길이
+               x1_tl = bbox[0]
+               y1_tl = bbox[1]
+               x1_br = bbox[0] + bbox[2]
+               y1_br = bbox[1] + bbox[3]
+               x2_tl = new_bbox[0]
+               y2_tl = new_bbox[1]
+               x2_br = new_bbox[0] + new_bbox[2]
+               y2_br = new_bbox[1] + new_bbox[3]
+               
+               """
+               # 로직 4 : 두 bbox의 겹치는 영역을 구해서, 영역이 안 겹칠때 new_bbox로 save
+               """
+               # 겹치는 x 길이 계산 
+               x_length = min(x1_br, x2_br) - max(x1_tl, x2_tl)
+               if x_length < 0:
+                   x_length = 0
+   
+               # 겹치는 y 길이 계산
+               y_length = min(y1_tl, y2_tl) - max(y1_br, y2_br)
+               if y_length < 0:
+                   y_length = 0
+               
+               x_overlap = x_length
+               y_overlap = y_length
+               overlap_area = x_overlap * y_overlap
+               
+               # 각 bbox의 영역을 구함
+               area_1 = (x1_br - x1_tl) * (y1_tl - y1_br)
+               area_2 = (x2_br - x2_tl) * (y2_tl - y2_br)
+               
+               # 영역을 다 더하고 overlap을 빼면 전체 크기가 계산됨.
+               # 전체에 대해 겹친 부분이 얼마나 되는지 계산
+               total_area = area_1 + area_2 - overlap_area
+               overlap_area = overlap_area / float(total_area)
+               # 겹친 부분이 일정 값 아래일경우에 추가
+               if overlap_area < threshold:
+                   new_bboxes.append(bbox)
+   
+   
+       return new_bboxes
+   ```
+
+2. 결과
+
+   ![Image Pasted at 2021-9-10 13-07](sub2_dg.assets/Image Pasted at 2021-9-10 13-07.png)
+
+### 6. seg_binarizer
+
+### 7. utils
 1. xyh2mat2D
 2. mat2D2xyh
 
