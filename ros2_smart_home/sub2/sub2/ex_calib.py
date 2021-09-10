@@ -385,8 +385,8 @@ class SensorCalib(Node):
 
             """
             로직 5. 라이다 x,y 좌표 데이터 중 정면 부분만 crop
-            xyz_p = 
             """
+            xyz_p = self.xyz[np.where(self.xyz[:, 0] >= 0)]
 
             """
             로직 6. transformation class 의 transform_lidar2cam 로 카메라 3d 좌표 변환
