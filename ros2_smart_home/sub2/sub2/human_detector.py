@@ -38,7 +38,7 @@ def non_maximum_supression(bboxes, threshold=0.5):
     bboxes.pop(0)
 
     for _, bbox in enumerate(bboxes):
-
+        isNew = True
         for new_bbox in new_bboxes:
 
             x1_tl = bbox[0]
