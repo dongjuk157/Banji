@@ -169,7 +169,32 @@ class HumanDetector(Node):
                 self.bbox_msg.h = 
 
             """
+            for (x, y, w, h) in rects:
 
+                xl.append(int(x))
+                yl.append(int(y))
+                wl.append(int(w))
+                hl.append(int(h))
+
+            if self.able_to_pub:
+
+                self.bbox_msg.num_bbox = len(rects)
+                # if len(rects) < 2 and len(rects_temp) == 2 :
+                #     print("low")
+                # if len(rects) > 2 :
+                #     print("high")
+
+                obj_list = rects
+
+                idxl = []
+                for i in range(len(obj_list)):
+                    idxl.append(i)
+                self.bbox_msg.idx_bbox = idxl
+
+                self.bbox_msg.x = xl
+                self.bbox_msg.y = yl
+                self.bbox_msg.w = wl
+                self.bbox_msg.h = hl
             for (x, y, w, h) in rects:
 
                 cv2.rectangle(img_bgr, (x, y), (x+w, y+h), (0, 255, 255), 2)
