@@ -120,6 +120,13 @@ class IMGParser(Node):
         self.find_cnt(contours_key)
 
         """
+        self.find_cnt(contours_wal)
+
+        self.find_cnt(contours_bp)
+
+        self.find_cnt(contours_rc)
+
+        self.find_cnt(contours_key)
 
     def find_cnt(self, contours):
         """
@@ -134,6 +141,9 @@ class IMGParser(Node):
             cv2.rectangle( ... )
 
         """
+        for cnt in contours:
+            x, y, w, h = cv2.boundingRect(cnt)
+            cv2.rectangle(self.img_bgr, (x, y), (x+w, y+h), (0, 0, 255), 1)
 
     def timer_callback(self):
 
