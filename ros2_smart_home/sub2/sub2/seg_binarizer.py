@@ -97,7 +97,17 @@ class IMGParser(Node):
         contours_key, _ = 
 
         """
+        contours_wal, _ = cv2.findContours(
+            self.img_wal, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
 
+        contours_bp, _ = cv2.findContours(
+            self.img_bp, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
+
+        contours_rc, _ = cv2.findContours(
+            self.img_rc, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
+
+        contours_key, _ = cv2.findContours(
+            self.img_key, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
         """
         # 로직 5. 물체의 bounding box 좌표 찾기
         
