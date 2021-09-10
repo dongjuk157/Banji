@@ -106,54 +106,37 @@ def transformMTX_lidar2cam(params_lidar, params_cam):
 
     """
     로직 1. params에서 라이다와 카메라 센서들의 자세, 위치 정보를 뽑기.
-
-    lidar_yaw, lidar_pitch, lidar_roll =
-    cam_yaw, cam_pitch, cam_roll =
+    """
+    lidar_yaw, lidar_pitch, lidar_roll = np.deg2rad(params_lidar["YAW"]), np.deg2rad(params_lidar["PITCH"]), np.deg2rad(params_lidar["ROLL"])
+    cam_yaw, cam_pitch, cam_roll = np.deg2rad(params_cam["YAW"]), np.deg2rad(params_cam["PITCH"]), np.deg2rad(params_cam["ROLL"])
     
-    lidar_pos = 
-    cam_pos = 
+    lidar_pos = [params_lidar["X"], params_lidar["Y"], params_lidar["Z"]]
+    cam_pos = [params_cam["X"], params_cam["Y"], params_cam["Z"]]
+    
 
     """
-    # numpy는 radian을 사용하기 때문에 degree로 들어온 각도를 변환해준다.
-    lidar_yaw, lidar_pitch, lidar_roll = [np.deg2rad(
-        params_lidar.get(i)) for i in (["YAW", "PITCH", "ROLL"])]
-    cam_yaw, cam_pitch, cam_roll = [np.deg2rad(
-        params_cam.get(i)) for i in (["YAW", "PITCH", "ROLL"])]
-
-    # Relative position of lidar w.r.t cam
-    lidar_pos = [params_lidar.get(i) for i in (["X", "Y", "Z"])]
-    cam_pos = [params_cam.get(i) for i in (["X", "Y", "Z"])]
-    """
-
     로직 2. 라이다에서 카메라 까지 변환하는 translation 행렬을 정의
-    Tmtx = 
-
     """
-    # 라이다 좌표에서 카메라 좌표를 빼면 카메라 기준 좌표에서 보는 x,y,z 값이 된다.
-    x_rel = lidar_pos[0] - cam_pos[0]
-    y_rel = lidar_pos[1] - cam_pos[1]
-    z_rel = lidar_pos[2] - cam_pos[2]
+    t_x, t_y, t_z = [lidar_pos[i] - cam_pos[i] for i in range(3)]
+    Tmtx = translationMtx(t_x, t_y, t_z)
 
 
     """
     로직 3. 카메라의 자세로 맞춰주는 rotation 행렬을 정의
+    """
+    Rmtx = np.matmul(rotationMtx(cam_yaw, cam_pitch, cam_roll), rotationMtx(lidar_yaw, lidar_pitch, lidar_roll))
 
-    Rmtx = 
 
     """
-    R_T = np.matmul(rotationMtx(lidar_yaw, lidar_pitch, lidar_roll).T,
-                    translationMtx(x_rel, y_rel, z_rel).T)
-    R_T = np.matmul(R_T, rotationMtx(cam_yaw, cam_pitch, cam_roll))
-    R_T = np.matmul(R_T, rotationMtx(np.deg2rad(-90.), 0., 0.))
-    R_T = np.matmul(R_T, rotationMtx(0, 0., np.deg2rad(-90.)))
-
-    """
-
     로직 4. 위의 두 행렬을 가지고 최종 라이다-카메라 변환 행렬을 정의
-    RT = 
-
     """
-    R_T = R_T.T
+    # 순서를 맞춰서 연산을 해야한다!
+    # 오른쪽에서 왼쪽으로 변환 한다고 생각하고 식을 세움
+    rotation_yaw_90 = rotationMtx(math.pi/2, 0, 0)
+    rotation_roll_90 = rotationMtx(0, 0, math.pi/2)
+    rotation_axis = np.matmul(rotation_roll_90, rotation_yaw_90)
+    RT = np.matmul(rotation_axis, np.matmul(Rmtx, Tmtx))
+    # print(RT)
 
     """
     테스트
@@ -189,7 +172,8 @@ def transformMTX_lidar2cam(params_lidar, params_cam):
     [ 0.00000000e+00  0.00000000e+00  0.00000000e+00  1.00000000e+00]]
 
     """
-    return R_T
+
+    return RT
     # return np.eye(4)
 
 
