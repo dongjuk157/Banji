@@ -37,7 +37,6 @@ class IMGParser(Node):
         self.timer = self.create_timer(self.timer_period, self.timer_callback)
 
     def img_callback(self, msg):
-
         # 로직 2. compressed image 받기
         np_arr = np.frombuffer(msg.data, np.uint8)
         self.img_bgr = cv2.imdecode(np_arr, cv2.IMREAD_COLOR)
@@ -66,14 +65,24 @@ class IMGParser(Node):
         self.img_key = cv2.inRange(self.img_bgr, lower_key, upper_key)
 
         """
-        lower_wal = (10, 240, 240)  # 지갑 20 255 246
-        upper_wal = (35, 255, 255)
-        lower_bp = (95, 200, 235)  # 가방 104 216 246
-        upper_bp = (120, 230, 255)
-        lower_rc = (90, 190, 200)  # 리모콘 111 209 215
-        upper_rc = (130, 230, 230)
-        lower_key = (10, 240, 240)
-        upper_key = (35, 255, 255)
+        # 시뮬레이터 메뉴얼 참조 or 이미지 캡처 후 그림판에서 데이터 추출
+        # lower_wal = (10, 240, 240)  # 지갑 20 255 246
+        # upper_wal = (35, 255, 255)
+        # lower_bp = (95, 200, 235)  # 가방 104 216 246
+        # upper_bp = (120, 230, 255)
+        # lower_rc = (90, 190, 200)  # 리모콘 111 209 215
+        # upper_rc = (130, 230, 230)
+        # lower_key = (10, 240, 240)
+        # upper_key = (35, 255, 255)
+
+        lower_wal = (100,245,255)
+        upper_wal = (110,255,255)
+        lower_bp = (100,210,235)
+        upper_bp = (110,220,255)
+        lower_rc = (100,210,200)
+        upper_rc = (110,220,220)
+        lower_key = (100,240,200)
+        upper_key = (110,250,220)
 
         self.img_wal = cv2.inRange(self.img_bgr, lower_wal, upper_wal)
 
@@ -97,17 +106,15 @@ class IMGParser(Node):
         contours_key, _ = 
 
         """
-        contours_wal, _ = cv2.findContours(
-            self.img_wal, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
+        
+        contours_wal, _ = cv2.findContours(self.img_wal,cv2.RETR_LIST,cv2.CHAIN_APPROX_SIMPLE)
 
-        contours_bp, _ = cv2.findContours(
-            self.img_bp, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
+        contours_bp, _ = cv2.findContours(self.img_bp,cv2.RETR_LIST,cv2.CHAIN_APPROX_SIMPLE)
 
-        contours_rc, _ = cv2.findContours(
-            self.img_rc, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
+        contours_rc, _ = cv2.findContours(self.img_rc,cv2.RETR_LIST,cv2.CHAIN_APPROX_SIMPLE)
 
-        contours_key, _ = cv2.findContours(
-            self.img_key, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
+        contours_key, _ = cv2.findContours(self.img_key,cv2.RETR_LIST,cv2.CHAIN_APPROX_SIMPLE)
+
         """
         # 로직 5. 물체의 bounding box 좌표 찾기
         
@@ -140,22 +147,24 @@ class IMGParser(Node):
 
             cv2.rectangle( ... )
 
-        """
+        """     
         for cnt in contours:
+    
             x, y, w, h = cv2.boundingRect(cnt)
-            cv2.rectangle(self.img_bgr, (x, y), (x+w, y+h), (0, 0, 255), 1)
+
+            cv2.rectangle( self.img_bgr, (x,y), (x+w,y+h), (0,255,0), 2)
 
     def timer_callback(self):
-
+        
         if self.img_bgr is not None:
 
             # 이미지가 ros subscriber로 받고 None이 아닌 array로 정의됐을 때,
             # object에 대한 bbox 추정을 시작.
             self.find_bbox()
-
+            
             # 로직 6. 물체의 bounding box 가 그려진 이미지 show
             cv2.imshow("seg_results", self.img_bgr)
-
+            
             cv2.waitKey(1)
         else:
             pass
