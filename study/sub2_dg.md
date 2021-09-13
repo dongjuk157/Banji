@@ -1023,6 +1023,84 @@ grayscale로 이진화된 이미지에서 윤곽선(edge)을 찾고,  findContou
 
 ### 6. seg_binarizer
 
+0. 시뮬레이터에서 카메라의 Ground Truth를 Semantic으로 변경후 사용한다.
+
+   ![Image Pasted at 2021-9-13 11-24](sub2_dg.assets/Image Pasted at 2021-9-13 11-24.png)
+
+   
+
+   ![Image Pasted at 2021-9-13 11-25](sub2_dg.assets/Image Pasted at 2021-9-13 11-25.png)
+
+1. find bounding box
+
+   ```python
+   def find_bbox(self):
+           """
+           # 로직 3. bgr 이미지의 binarization
+           # 지갑, 키 등의 물체에 대한 bgr 값을 알고, 이 값 범위에 해당되는
+           # cv2.inRange 함수를 써서 각 물체에 대해 binarization 하십시오.
+           """
+           lower_wal = (100, 245, 255)
+           upper_wal = (110, 255, 255)
+           lower_bp = (100, 210, 235)
+           upper_bp = (110, 220, 255)
+           lower_rc = (100, 210, 200)
+           upper_rc = (110, 220, 220)
+           lower_key = (100, 240, 200)
+           upper_key = (110, 250, 220)
+   
+           self.img_wal = cv2.inRange(self.img_bgr, lower_wal, upper_wal)
+           self.img_bp = cv2.inRange(self.img_bgr, lower_bp, upper_bp)
+           self.img_rc = cv2.inRange(self.img_bgr, lower_rc, upper_rc)
+           self.img_key = cv2.inRange(self.img_bgr, lower_key, upper_key)
+   
+           """
+           # 로직 4. 물체의 contour 찾기
+           # 지갑, 키 등의 물체들이 차지한 픽셀만 흰색으로 이진화되어 있는 이미지에 대해서,
+           # 흰색 영역을 감싸는 contour들을 구하십시오.
+           """
+           contours_wal, _ = cv2.findContours(self.img_wal, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
+           contours_bp, _ = cv2.findContours(self.img_bp, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
+           contours_rc, _ = cv2.findContours(self.img_rc, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
+           contours_key, _ = cv2.findContours(self.img_key, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
+   
+           """
+           # 로직 5. 물체의 bounding box 좌표 찾기
+           """
+   
+           self.find_cnt(contours_wal)
+           self.find_cnt(contours_bp)
+           self.find_cnt(contours_rc)
+           self.find_cnt(contours_key)
+   ```
+
+   - bgr값을 못찾아서 헤맸는데 시뮬레이터 매뉴얼에 있었다. 
+   - `cv2.findContours` 에 대해서는 사전학습에 있으니 넘어간다.
+
+2. find contours
+
+   ```python
+       def find_cnt(self, contours):
+           """
+           # 로직 5. 물체의 bounding box 좌표 찾기
+           # 지갑, 키 등의 물체들의 흰색 영역을 감싸는 contour 결과를 가지고
+           # bbox를 원본 이미지에 draw 하십시오.
+           """     
+           # cv2.drawContours(self.img_bgr, contours, -1, (0, 255, 255), 2)
+           # print(contours)
+   
+           for cnt in contours:    
+               x, y, w, h = cv2.boundingRect(cnt)
+               cv2.rectangle(self.img_bgr, (x, y), (x + w, y + h), (0, 255, 255), 2)
+   ```
+
+   - `drawContours` 함수를 사용하면 직사각형이 아닌 컨투어에 딱 맞게 나온다.
+   - 컨투어의 모든 점을 비교해서 min, max 값으로 rectangle 함수를 적용시켰는데 어떨땐 뜨고 어떨땐 뜨지 않는 문제가 있었다.
+
+3. 결과
+
+   ![Image Pasted at 2021-9-13 16-34](sub2_dg.assets/Image Pasted at 2021-9-13 16-34.png)
+
 ### 7. utils
 1. xyh2mat2D
 2. mat2D2xyh
