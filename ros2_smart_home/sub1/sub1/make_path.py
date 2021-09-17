@@ -3,7 +3,7 @@ from rclpy.node import Node
 from geometry_msgs.msg import PoseStamped
 from std_msgs.msg import Float32
 from squaternion import Quaternion
-from nav_msgs.msg import Odometry,Path
+from nav_msgs.msg import Odometry, Path
 import os
 from math import sqrt
 import sub2
@@ -28,31 +28,36 @@ class makePath(Node):
     def __init__(self):
         super().__init__('make_path')
 
-
-        # 로직 1. 노드에 필요한 publisher, subscriber 생성      
+        # 로직 1. 노드에 필요한 publisher, subscriber 생성
         self.path_pub = self.create_publisher(Path, 'global_path', 10)
-        self.subscription = self.create_subscription(Odometry,'/odom',self.listener_callback,10)
-
+        self.subscription = self.create_subscription(
+            Odometry, '/odom', self.listener_callback, 10)
 
         '''
         로직 2. 저장할 경로 및 텍스트파일 이름을 정하고, 쓰기 모드로 열기
         full_path=
         self.f=
         '''
-        
-        self.is_odom=True
-        #이전 위치를 저장할 변수입니다.
-        self.prev_x=0.0
-        self.prev_y=0.0
+       # now_path = os.path.abspath(__file__)
+        pkg_path = os.getcwd()
+        back_folder = 'Desktop\\catkin_sub1\\src\\sub1'
+        folder_name = 'path'
+        file_name = 'test.txt'
+        full_path = os.path.join(pkg_path, back_folder, folder_name, file_name)
+       # full_path = now_path[:-48] + 'src/sub1/path/path.txt'
+        self.f = open(full_path, 'w')
+        self.is_odom = True
+        # 이전 위치를 저장할 변수입니다.
+        self.prev_x = 0.0
+        self.prev_y = 0.0
 
-        self.path_msg=Path()
-        self.path_msg.header.frame_id='map'
+        self.path_msg = Path()
+        self.path_msg.header.frame_id = 'map'
 
-
-
-    def listener_callback(self,msg):
-        print('x : {} , y : {} '.format(msg.pose.pose.position.x,msg.pose.pose.position.y))
-        if self.is_odom ==False :   
+    def listener_callback(self, msg):
+        print('x : {} , y : {} '.format(
+            msg.pose.pose.position.x, msg.pose.pose.position.y))
+        if self.is_odom == False:
             pass
             '''
             로직 3. 콜백함수에서 처음 메시지가 들어오면 초기 위치를 저장해줍니다. 
@@ -60,21 +65,22 @@ class makePath(Node):
             self.prev_x = 
             self.prev_y = 
             '''
+            self.is_odom = True
+            self.prev_x = msg.pose.pose.position.x
+            self.prev_y = msg.pose.pose.position.y
+        else:
+            waypint_pose = PoseStamped()
+            # x,y 는 odom 메시지에서 받은 로봇의 현재 위치를 나타내는 변수입니다.
+            x = msg.pose.pose.position.x
+            y = msg.pose.pose.position.y
 
-        else :            
-            waypint_pose=PoseStamped()
-            #x,y 는 odom 메시지에서 받은 로봇의 현재 위치를 나타내는 변수입니다.
-            x=msg.pose.pose.position.x
-            y=msg.pose.pose.position.y
-   
             '''
             로직 4. 콜백함수에서 이전 위치와 현재 위치의 거리 계산
             (테스트) 유클리디안 거리를 구하는 부분으로 x=2, y=2 이고, self.prev_x=0, self.prev_y=0 이라면 distance=2.82가 나와야합니다.
 
             distance = 
             '''
-            
-            
+            distance = sqrt(pow(x-self.prev_x, 2)+pow(y-self.prev_y, 2))
             '''
             if distance > 0.1 :
                 로직 5. 거리차이가 위치보다 0.1m 이상일 때 위치를 path_msg.poses에 추가하고 publish
@@ -84,18 +90,29 @@ class makePath(Node):
                 self.path_msg.poses.append(waypint_pose)
                 self.path_pub.publish(self.path_msg)                
             '''
-                
-            '''
+            if distance > 0.1:
+                waypint_pose.pose.position.x = x
+                waypint_pose.pose.position.y = y
+                waypint_pose.pose.orientation.w = 1.0
+                self.path_msg.poses.append(waypint_pose)
+                self.path_pub.publish(self.path_msg)
+
+                # 이동 했을 경우에만 출력합니다.
+                print('x : {} , y : {} '.format(x, y))
+                '''
                 로직 6. x,y 를 문자열로 바꾸고 x와 y 사이의 문자열은 /t 로 구분
                 data=
                 self.f
                 self.prev_x=x
                 self.prev_y=y
-            '''
+                '''
+                data = str(x) + '\t' + str(y) + '\n'
+                self.f.write(data)
 
-            
-            
-        
+                self.prev_x = x
+                self.prev_y = y
+
+
 def main(args=None):
     rclpy.init(args=args)
 

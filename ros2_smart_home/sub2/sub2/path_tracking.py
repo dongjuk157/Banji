@@ -46,9 +46,10 @@ class followTheCarrot(Node):
         self.cmd_msg=Twist()
 
         # 로직 2. 파라미터 설정
+        # lfd: 전방주시거리 및 최소, 최대 전방주시거리를 설정
         self.lfd=0.1
         self.min_lfd=0.1
-        self.max_lfd=1.0
+        self.max_lfd=2.0
 
 
     def timer_callback(self):
@@ -64,6 +65,9 @@ class followTheCarrot(Node):
                 robot_pose_y=self.odom_msg.pose.pose.position.y
 
                 # 로봇이 경로에서 떨어진 거리를 나타내는 변수
+                # local_path가 있으면 로봇과 가장 가까이 있는 경로점과 로봇과의 거리를 계산
+                # 왜 이걸 계산하면 멀리떨어져있을 때 전방주시거리를 멀리보게하기 위해서 구한다.
+                # 피타고라스 !
                 lateral_error= sqrt(pow(self.path_msg.poses[0].pose.position.x-robot_pose_x,2)+pow(self.path_msg.poses[0].pose.position.y-robot_pose_y,2))
                 print(robot_pose_x,robot_pose_y,lateral_error)
                 '''
@@ -77,6 +81,16 @@ class followTheCarrot(Node):
                     self.lfd=self.max_lfd
 
                 '''
+                # lateral_error와 주행하는 선속도와 적절하게 전방주시거리를 설정한다.
+                # 너무 작거나 커질 수 있기에 최소 최대로 한정짓는다. 사전영상 18분정도쯤 참고 !
+                
+                self.lfd = (self.status_msg.twist.linear.x+lateral_error)*0.5
+                
+                if self.lfd < self.min_lfd :
+                    self.lfd=self.min_lfd
+
+                if self.lfd > self.max_lfd:
+                    self.lfd=self.max_lfd
 
                 min_dis=float('inf')
                 '''
@@ -90,7 +104,18 @@ class followTheCarrot(Node):
                         self.forward_point=
                         self.is_look_forward_point=
 
-                '''               
+                '''
+                for num,waypoint in enumerate(self.path_msg.poses) :
+                    # 현재 경로점
+                    self.current_point = waypoint.pose.position
+                    # lfd만큼 떨어져 있는 경로점을 찾는 부분임 (피타고라스 적용, 로봇과 경로점 간)
+                    dis = sqrt(pow(self.path_msg.poses[0].pose.position.x-self.current_point.x, 2) + 
+                               pow(self.path_msg.poses[0].pose.position.y-self.current_point.y, 2))
+                    if abs(dis-self.lfd) < min_dis :
+                        min_dis = abs(dis-self.lfd)
+                        self.forward_point = self.current_point
+                        # 전방주시거리만큼 떨어진 경로점을 찾았다
+                        self.is_look_forward_point = True               
                 
                 if self.is_look_forward_point :
             
@@ -113,13 +138,25 @@ class followTheCarrot(Node):
                     theta=
                     
                     '''
+                    trans_matrix=np.array([
+                                          [cos(self.robot_yaw), -sin(self.robot_yaw), robot_pose_x],
+                                          [sin(self.robot_yaw), cos(self.robot_yaw), robot_pose_y],
+                                          [0, 0, 1]])
+                    det_trans_matrix=np.linalg.inv(trans_matrix)
+                    local_forward_point=det_trans_matrix.dot(global_forward_point)
+                    # lfd를 더한 경로점과 로봇과의 사이 각 / 추후 내용 더 작성예정
+                    theta=-atan2(local_forward_point[1], local_forward_point[0])
                     
                     '''
                     로직 7. 선속도, 각속도 정하기
                     out_vel=
                     out_rad_vel=
 
-                    '''             
+                    '''
+                    # 적절하게 주어지게한다
+                    out_vel = 1.0
+                    # 앞서 구한 theta를 이용해 제어할 각속도로 이용한다 / 크면 클수록 경로에 빠르게 수렴함. 천천히는 반대
+                    out_rad_vel = theta * 2              
 
                     self.cmd_msg.linear.x=out_vel
                     self.cmd_msg.angular.z=out_rad_vel                    
@@ -143,6 +180,8 @@ class followTheCarrot(Node):
         _,_,self.robot_yaw=
 
         ''' 
+        q=Quaternion(msg.pose.pose.orientation.w, msg.pose.pose.orientation.x, msg.pose.pose.orientation.y, msg.pose.pose.orientation.z)
+        _,_,self.robot_yaw=q.to_euler()
 
     
     def path_callback(self, msg):
