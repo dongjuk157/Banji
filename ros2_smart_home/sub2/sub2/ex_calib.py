@@ -21,8 +21,8 @@ params_lidar = {
 
 
 params_cam = {
-    "WIDTH": 320, # image width
-    "HEIGHT": 240, # image height
+    "WIDTH": 640, # image width
+    "HEIGHT": 480, # image height
     "FOV": 60, # Field of view
     "localIP": "127.0.0.1",
     "localPort": 1232,
@@ -121,6 +121,9 @@ def transformMTX_lidar2cam(params_lidar, params_cam):
     Tmtx = translationMtx(t_x, t_y, t_z)
 
 
+    xt, yt, zt = np.subtract(lidar_pos, cam_pos)
+    Tmtx = translationMtx(xt, yt, zt)
+
     """
     로직 3. 카메라의 자세로 맞춰주는 rotation 행렬을 정의
     """
@@ -171,6 +174,7 @@ def transformMTX_lidar2cam(params_lidar, params_cam):
     [ 1.00000000e+00  6.12323400e-17  6.12323400e-17 -2.44929360e-17]
     [ 0.00000000e+00  0.00000000e+00  0.00000000e+00  1.00000000e+00]]
 
+    테스트 확인
     """
 
     return RT
@@ -190,9 +194,7 @@ def project2img_mtx(params_cam):
     
     """
     로직 1. params에서 카메라의 width, height, fov를 가져와서 focal length를 계산.
-    
-    fc_x = 
-    fc_y = 
+    제공되는 카메라의 fov는 수직 방향이므로 height을 사용함
     """
     fc_x = params_cam["HEIGHT"]/(2*np.tan(np.deg2rad(params_cam["FOV"]/2)))
     fc_y = params_cam["HEIGHT"]/(2*np.tan(np.deg2rad(params_cam["FOV"]/2)))
@@ -200,17 +202,13 @@ def project2img_mtx(params_cam):
 
     """
     로직 2. 카메라의 파라메터로 이미지 프레임 센터를 계산.
-    cx = 
-    cy = 
+    이미지 가로세로의 1/2
     """
     cx = params_cam["WIDTH"]/2
     cy = params_cam["HEIGHT"]/2
 
     """
-
     로직 3. Projection 행렬을 계산.
-    R_f =
-
     """
     R_f = np.array([[fc_x,  0,      cx],
                     [0,     fc_y,   cy]])
@@ -236,6 +234,8 @@ def project2img_mtx(params_cam):
     R_f = 
     [[207.84609691   0.         160.        ]
     [  0.         207.84609691 120.        ]]
+
+    테스트 확인
     """
 
     return R_f
@@ -277,9 +277,6 @@ class LIDAR2CAMTransform:
         self.proj_mtx = project2img_mtx(params_cam)
 
     def transform_lidar2cam(self, xyz_p):
-        
-        xyz_c = xyz_p
-        
         """
         로직 2. 클래스 내 self.RT로 라이다 포인트들을 카메라 좌표계로 변환시킨다.
         """
@@ -353,8 +350,7 @@ class SensorCalib(Node):
         self.xyz, self.R, self.intens = None, None, None
         self.img = None
 
-    def img_callback(self, msg):
-        
+    def img_callback(self, msg):        
         """
         로직 3. 카메라 콜백함수에서 이미지를 클래스 내 변수로 저장.
         """
@@ -404,11 +400,16 @@ class SensorCalib(Node):
             img_l2c = draw_pts_img(self.img, xy_i[:, 0].astype(np.int32),xy_i[:, 1].astype(np.int32))
 
             cv2.imshow("Lidar2Cam", img_l2c)
+
             cv2.waitKey(1)
 
         else:
 
             print("waiting for msg")
+            if self.xyz is None:
+                print("self.xyz: ", self.xyz)
+            if self.img is None:
+                print("self.img: ", self.img)
             pass
 
 
