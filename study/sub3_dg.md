@@ -147,3 +147,9 @@ Thrun, FOx, Burgard의 particle motion model 사용
 
 ## 개발 및 결과
 
+### 1. iot_udp
+
+초기 상태
+
+![image-20210923120454995](sub3_dg.assets/image-20210923120454995.png)
+
