@@ -1,4 +1,3 @@
-
 import rclpy
 from rclpy.node import Node  
 import time
@@ -97,12 +96,6 @@ class iot_udp(Node):
         '''
         로직 3. 수신 데이터 파싱
         '''
-        if not raw_data:
-            print("none!!")
-            self.is_recv_data = False
-            self.recv_data = []
-            self.parsed_data_deque = deque(maxlen=100)
-            return
         header = raw_data[:19].decode() # 14 byte, #Appliances-Status$
         data_length = raw_data[19:23] # 4 byte, \x14\x00\x00\x00
         aux_data = raw_data[23:35] # 12 byte, \x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00
