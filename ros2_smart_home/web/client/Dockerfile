@@ -1,7 +1,8 @@
 FROM node:14 as build-stage
 WORKDIR /var/jenkins_home/workspace/B301/client
 
-COPY package*.json ./
+# COPY package*.json ./
+COPY package.json ./
 RUN npm install 
 COPY . .
 RUN npm run build
