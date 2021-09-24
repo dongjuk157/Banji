@@ -392,3 +392,7 @@ Ctrl+C 를 사용하면 keyboardInterrupt Error 발생
 
 ![Image Pasted at 2021-9-24 12-48 (4)](sub3_dg.assets/Image Pasted at 2021-9-24 12-48 (4).png)
 
+
+
+[전체 코드](./src/iot_udp_dg.py)
+
