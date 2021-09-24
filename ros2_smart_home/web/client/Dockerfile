@@ -1,4 +1,4 @@
-ROM node:14 as build-stage
+FROM node:14 as build-stage
 WORKDIR //var/jenkins_home/workspace/B301/ros2_smart_home/web/client//web/client/
 
 # COPY package*.json ./
@@ -10,7 +10,7 @@ RUN npm run build
 
 
 FROM nginx:stable-alpine as production-stage
-COPY --from=build-stage /var/jenkins_home/workspace/B301/ros2_smart_home/web/client/dist /usr/share/nginx/html
+COPY --from=build-stage /var/jenkins_home/workspace/B301/ros2_smart_home/web/client//dist /usr/share/nginx/html
 COPY --from=build-stage /var/jenkins_home/workspace/B301/ros2_smart_home/web/client/client/nginx/conf.d/*.conf /etc/nginx/conf.d/
 
 EXPOSE 80
