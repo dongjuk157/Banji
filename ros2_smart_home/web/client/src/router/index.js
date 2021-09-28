@@ -1,6 +1,7 @@
 import Vue from 'vue';
 import VueRouter from 'vue-router';
 import Home from '../views/Home.vue';
+import RobotStatus from '../components/RobotStatus.vue';
 
 Vue.use(VueRouter);
 
@@ -22,6 +23,11 @@ const routes = [
     path: '/notfound',
     name: 'NotFound',
     component: () => import(/* webpackChunkName: "about" */ '../components/NotFound.vue'),
+  },
+  {
+    path: '/settings/robot',
+    name: 'RobotSetting',
+    component: RobotStatus,
   },
   {
     path: '*',
