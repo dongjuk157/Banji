@@ -277,9 +277,11 @@ class iot_udp(Node):
         # TRY_TO_CONNECT 명령을 보내 접속해줌
         if self.is_recv_data:
             if params_status[(int(self.recv_data[1][0], 16), int(self.recv_data[1][1], 16))] == "CONNECTION_LOST":
-                self.send_data(self.recv_data[0], params_control_cmd["RESET"])
+                while params_status[(int(self.recv_data[1][0], 16), int(self.recv_data[1][1], 16))] == "CONNECTION_LOST":
+                    self.send_data(self.recv_data[0], params_control_cmd["RESET"])
             else:
-                self.send_data(self.recv_data[0], params_control_cmd["TRY_TO_CONNECT"])
+                while params_status[(int(self.recv_data[1][0], 16), int(self.recv_data[1][1], 16))] == "IDLE":
+                    self.send_data(self.recv_data[0], params_control_cmd["TRY_TO_CONNECT"])
         else:
             print('연결된 디바이스가 없습니다. 디바이스 근처로 가주세요')
 
@@ -293,15 +295,17 @@ class iot_udp(Node):
 
     
     def control(self):
-        # 한번에 켜지거나 안꺼질 때 thread이용해보라? => 비슷함... 완전해결이안됨 
+        # 한번에 켜지거나 안꺼질 때 thread이용해보라? => 비슷함... 
         if self.is_recv_data:
             if params_status[(int(self.recv_data[1][0], 16), int(self.recv_data[1][1], 16))] == "CONNECTION":
                 # 켜져있으면 끄고
                 if params_status[(int(self.recv_data[2][0], 16), int(self.recv_data[2][1], 16))] == "ON":
-                    self.send_data(self.recv_data[0], params_control_cmd["SWITCH_OFF"])
+                    while params_status[(int(self.recv_data[2][0], 16), int(self.recv_data[2][1], 16))] == "ON":
+                        self.send_data(self.recv_data[0], params_control_cmd["SWITCH_OFF"])
                 # 꺼져있으면 킨다.
                 else:
-                    self.send_data(self.recv_data[0], params_control_cmd["SWITCH_ON"])
+                    while params_status[(int(self.recv_data[2][0], 16), int(self.recv_data[2][1], 16))] == "OFF":
+                        self.send_data(self.recv_data[0], params_control_cmd["SWITCH_ON"])
         '''
         로직 8. iot control
         
@@ -313,8 +317,8 @@ class iot_udp(Node):
     # 연결 해제
     def disconnect(self):
         if self.is_recv_data==True :
-            self.send_data(self.recv_data[0],params_control_cmd["DISCONNECT"])
-            # 해제가 되면 바로 되야하는데 안되니까... 
+            while params_status[(int(self.recv_data[1][0], 16), int(self.recv_data[1][1], 16))] == "CONNECTION":
+                self.send_data(self.recv_data[0],params_control_cmd["DISCONNECT"])
         
 
     def all_procedures(self):
