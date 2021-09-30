@@ -30,6 +30,11 @@ const routes = [
     component: () => import('../components/NotFound.vue'),
   },
   {
+    path: '/map',
+    name: 'Map',
+    component: () => import('../components/Map.vue'),
+  },
+  {
     path: '/settings/robot',
     name: 'RobotSetting',
     component: RobotStatus,
