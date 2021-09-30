@@ -20,9 +20,14 @@ const routes = [
     component: () => import(/* webpackChunkName: "about" */ '../views/About.vue'),
   },
   {
+    path: '/schedule',
+    name: 'Schedule',
+    component: () => import('../components/Scheduler.vue'),
+  },
+  {
     path: '/notfound',
     name: 'NotFound',
-    component: () => import(/* webpackChunkName: "about" */ '../components/NotFound.vue'),
+    component: () => import('../components/NotFound.vue'),
   },
   {
     path: '/settings/robot',
