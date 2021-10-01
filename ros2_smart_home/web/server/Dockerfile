@@ -10,7 +10,7 @@ RUN npm install
 
 COPY . .
 
-# binding port 3000
-EXPOSE 3000
+# binding port 12001
+EXPOSE 12001
 
 CMD ["npm", "start"]
