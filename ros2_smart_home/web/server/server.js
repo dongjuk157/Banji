@@ -34,130 +34,45 @@ const roomName = 'team';
 
 io.on('connection', socket => {
     socket.join(roomName);
-
-    // 로직 3. 사용자의 메시지 수신시 WebClient로 메시지 전달
+    // 로직 3. 사용자(frontend)의 메시지 수신시 WebClient로 메시지 전달
     // message = [month, day, hour, minute]
-    socket.on('sendTime', (message) => {
-        console.log(message);
-        socket.to(roomName).emit('sendTimeToWeb', message);
+    socket.on('back_environment_front', (message) => {
+        // console.log('환경 정보 줘')
+        socket.to(roomName).emit('robot_environment_back', message);
     });
-    // message = "weather"
-    socket.on('sendWeather', (message) => {
-        console.log(message)
-        socket.to(roomName).emit('sendWeatherToWeb', message);
+    socket.on('back_robotStatus_front', (message) => {
+        // console.log('로봇 정보 줘')
+        socket.to(roomName).emit('robot_robotStatus_back', message);
     });
-    // message = temperature
-    socket.on('sendTemperature', (message) => {
-        console.log(message)
-        socket.to(roomName).emit('sendTemperatureToWeb', message);
+    socket.on('back_control_front', (message) => {
+        // console.log('가전 제어 해')
+        socket.to(roomName).emit('robot_control_back', message)
     });
-
-    // message = { 'name' = [ [uid], 'net_state', 'obj_state', [iotX, iotY], [imgX, imgY] }
-    socket.on('sendRegistedObj', (message) => {
-        console.log(message)
-        socket.to(roomName).emit('sendRegistedObjToWeb', message);
-    });
-    // message = { 'name' = [ [uid], 'net_state', 'obj_state', [iotX, iotY], [imgX, imgY] }
-    socket.on('sendRegScannedObj', (message) => {
-        console.log(message)
-        socket.to(roomName).emit('sendRegScannedObjToWeb', message);
-    });
-    // message = { 'uid' = [ 'uid', 'net_state', 'obj_state' ] }
-    socket.on('sendNewScannedObj', (message) => {
-        console.log(message)
-        socket.to(roomName).emit('sendNewScannedObjToWeb', message);
-    });
-    // message = [x, y] 
-    socket.on('sendRocation', (data) => {
-        console.log('sendRocationToWeb')
-        socket.to(roomName).emit('sendRocationToWeb', data);
-    })
-
-    // message = True / False
-    socket.on('sendSecurityStatus', (data) => {
-        console.log('sendSecurityStatusToWeb')
-        socket.to(roomName).emit('sendSecurityStatusToWeb', data)
-    })
-
-    // message = ["imgStr"]
-    socket.on('sendThief', (data) => {
-        console.log(data)
-        const stringToList = data.split(" ");
-        console.log(stringToList)
-        socket.to(roomName).emit('sendThiefToWeb', stringToList);
-    })
-
-    // 로직 4. WebClient에서 메시지 수신시 사용자에게 메시지 전달
-    socket.on('sendStateRefreshToServer', (data) => {
-        console.log('sendStateRefresh')
-        socket.to(roomName).emit('sendStateRefresh', data);
-    });
-
-    socket.on('sendAirPurifierOnToServer', (data) => {
-        console.log('가전제품 ON/OFF')
-        socket.to(roomName).emit('sendAirConOn', data);
-    });
-
-    socket.on('sendScanOnToServer', (data) => {
-        console.log('sendScanOn')
-        socket.to(roomName).emit('sendScanOn', data);
-    });
-
-    socket.on('sendScanOffToServer', (data) => {
-        console.log('sendScanOff')
-        socket.to(roomName).emit('sendScanOff', data);
+    socket.on('back_loadmap_front', (message) => {
+        // console.log('지도 줘')
+        socket.to(roomName).emit('robot_loadmap_back', message)
     });
     
-    socket.on('sendGetRegObjToServer', (data) => {
-        console.log('sendGetRegObj')
-        socket.to(roomName).emit('sendGetRegObj', data);
-    });
-
-    socket.on('sendObjOnToServer', (data) => {
-        console.log('sendObjOn')
-        socket.to(roomName).emit('sendObjOn', data);
-    });
-
-    socket.on('sendObjOffToServer', (data) => {
-        console.log('sendObjOff')
-        socket.to(roomName).emit('sendObjOff', data);
-    });
-
-
-    socket.on('sendRegistObjToServer', (data) => {
-        console.log('sendRegistObj')
-        socket.to(roomName).emit('sendRegistObj', data);
-    });
-
-    socket.on('sendRemoveObjToServer', (data) => {
-        console.log('sendRemoveObj')
-        socket.to(roomName).emit('sendRemoveObj', data);
-    });
-
-    socket.on('sendGetRocationToServer', (data) => {
-        console.log('sendGetRocation')
-        socket.to(roomName).emit('sendGetRocation', data);
-    })
-
-    socket.on('sendSecurityModeOnToServer', (data) => {
-        console.log('sendSecurityModeOn')
-        socket.to(roomName).emit('sendSecurityModeOn', data);
-    })
-
-    socket.on('sendSecurityModeOffToServer', (data) => {
-        console.log('sendSecurityModeOff')
-        socket.to(roomName).emit('sendSecurityModeOff', data);
-    })
-
-    socket.on('sendGetSecurityStatusToServer', (data) => {
-        console.log('sendGetSecurityStatus')
-        socket.to(roomName).emit('sendGetSecurityStatus', data);
-    })
     
-    socket.on('sendGetThiefToServer', (data) => {
-        console.log('sendGetThief')
-        socket.to(roomName).emit('sendGetThief', data);
-    })
+    // 로직 4 로봇의 메시지 수신
+    socket.on('back_environment_robot', (message) => {
+        // console.log('환경 정보 줄게')
+        socket.to(roomName).emit('front_environment_back', message);
+    });
+    socket.on('back_robotStatus_robot', (message) => {
+        // console.log('로봇 정보 줄게')
+        socket.to(roomName).emit('front_robotStatus_back', message);
+    });
+    socket.on('back_control_robot', (message) => {
+        // console.log('가전 제어 했어') 
+        socket.to(roomName).emit('front_control_back', message);
+    });
+    socket.on('back_loadmap_robot', (message) => {
+        // console.log('지도 줄게') 
+        socket.to(roomName).emit('front_loadmap_back', message);
+    });
+
+
 
 
     socket.on('disconnect', () => {

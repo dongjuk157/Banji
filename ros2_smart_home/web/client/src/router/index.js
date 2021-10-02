@@ -40,6 +40,11 @@ const routes = [
     component: () => import('../components/Map.vue'),
   },
   {
+    path: '/control',
+    name: 'Control',
+    component: () => import('../components/Control.vue'),
+  },
+  {
     path: '/settings/robot',
     name: 'RobotSetting',
     component: RobotStatus,

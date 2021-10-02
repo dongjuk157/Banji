@@ -26,15 +26,6 @@
     </v-col>
     {{ temp }}
     <v-col cols="6">
-      <p>TimeInfo</p>
-      <textarea id="tAreaTime" rows="4"></textarea>
-      <p>WeatherInfo</p>
-      <textarea id="tAreaWeather" rows="4"></textarea>
-      <p>TemperatureInfo</p>
-      <textarea id="tAreaTemp" rows="4"></textarea>
-      <v-btn id="A1-btn" @click="status_click_on">상태 정보 얻기 </v-btn>
-    </v-col>
-    <v-col cols="6">
       <p>가전 제품 켜기 / 끄기</p>
       <v-btn id="btn" @click="airPurifier_btn_click(1)">On / OFF</v-btn>
     </v-col>
@@ -47,62 +38,35 @@ export default {
     return {
       time: new Date().getTime(),
       temp: 0,
+      info: {
+        time: '',
+        weather: '',
+        temperature: '',
+      },
     };
   },
   mounted() {
     // this.$socket.on("chat", (data) => {});
 
     this.$socket.on('sendTimeToWeb', (message) => {
-      console.log('sendTimeToWeb', message);
-      document.querySelector('#tAreaTime').value = message;
+      // console.log('sendTimeToWeb', message);
+      const msgString = `${message[0]}월 ${message[1]}일 ${message[2]}:${message[3]}`;
+      this.info.time = msgString;
     });
 
     this.$socket.on('sendWeatherToWeb', (message) => {
-      console.log('sendWeatherToWeb', message);
-      document.querySelector('#tAreaWeather').value = message;
+      // console.log('sendWeatherToWeb', message);
+      this.info.weather = message;
     });
 
     this.$socket.on('sendTemperatureToWeb', (message) => {
       console.log('sendTemperatureToWeb', message);
-      this.temp = message;
+      this.info.temperature = message;
     });
 
     this.$socket.on('sendAirConditionerToWeb', (message) => {
       console.log('sendAirConditionerToWeb', message);
-      document.querySelector('#tAreaAircon').value = message;
     });
-  },
-  socket: {
-    disconnect() {
-      console.log('disconnected form server_client.');
-    },
-    // 로직 1. 서버에서 온 메시지를 웹페이지에 전달
-    sendTimeToWeb(message) {
-      console.log('sendTimeToWeb', message);
-      document.querySelector('#tAreaTime').value = message;
-    },
-    sendWeatherToWeb(message) {
-      console.log('sendWeatherToWeb', message);
-      document.querySelector('#tAreaWeather').value = message;
-    },
-    sendTemperatureToWeb(message) {
-      console.log('sendTemperatureToWeb', message);
-      document.querySelector('#tAreaTemp').value = message;
-    },
-    sendAirConditionerToWeb(message) {
-      console.log('sendAirConditionerToWeb', message);
-      document.querySelector('#tAreaAircon').value = message;
-    },
-
-    // 로직 1. 서버에서 온 메시지를 웹페이지에 전달
-    sendSafetyStatus(message) {
-      console.log('sendSafetyStatus', message);
-      document.querySelector('#tSafetyStatus').value = message;
-    },
-    sendPatrolStatus(message) {
-      console.log('sendPatrolStatus', message);
-      document.querySelector('#tPatrolStatus').value = message;
-    },
   },
   methods: {
     imageLoad() {
