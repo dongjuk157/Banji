@@ -4,32 +4,49 @@
     <!-- <v-col cols="6">
       <v-img :src="imageSrc" width="480" @load="imageLoad" @error="imageError"></v-img>
     </v-col> -->
-    <v-col cols="6">
-      <!-- 로직 4. 수동 컨트롤 버튼 생성 -->
+    <!-- 로직 4. 수동 컨트롤 버튼 생성 -->
+    <!-- <v-col cols="6">
       <p>Manual Controller</p>
       <Move />
+    </v-col> -->
+    <v-col>
+      <v-btn
+        @click="getCam"
+      >
+        cam
+      </v-btn>
+      <v-img
+        :src="imgSrc"
+      />
     </v-col>
   </v-row>
 </template>
 
 <script>
-import Move from './Move.vue';
+// import Move from './Move.vue';
 
 export default {
   components: {
-    Move,
+    // Move,
   },
   data() {
     return {
       time: new Date().getTime(),
+      imgSrc: null,
     };
   },
   mounted() {
-    this.$socket.on('sendAirConditionerToWeb', (message) => {
-      console.log('sendAirConditionerToWeb', message);
+    this.$socket.on('front_robotview_back', (msg) => {
+      console.log(msg);
+      const src = `data:image/png;base64,${msg}`;
+      this.imgSrc = src;
     });
   },
   methods: {
+    getCam() {
+      console.log('cam');
+      this.$socket.emit('back_robotview_front', 'cam');
+    },
     imageLoad() {
       setTimeout(() => {
         this.time = new Date().getTime();

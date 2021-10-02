@@ -59,8 +59,11 @@ io.on('connection', socket => {
         // stop: x,z 모두 0으로
         // console.log(message)
         socket.to(roomName).emit('robot_move_back', message)
-    })
-    
+    });
+    socket.on('back_robotview_front', (message) => {
+        // console.log("back_robotview_front")
+        socket.to(roomName).emit('robot_robotview_back', message)
+    });
     
     // 로직 4 로봇의 메시지 수신
     socket.on('back_environment_robot', (message) => {
@@ -78,6 +81,10 @@ io.on('connection', socket => {
     socket.on('back_loadmap_robot', (message) => {
         // console.log('지도 줄게') 
         socket.to(roomName).emit('front_loadmap_back', message);
+    });
+    socket.on('back_robotview_robot', (message) => {
+        // console.log("back_robotview_robot")
+        socket.to(roomName).emit('front_robotview_back', message);
     });
 
 
