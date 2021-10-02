@@ -52,6 +52,11 @@ io.on('connection', socket => {
         // console.log('지도 줘')
         socket.to(roomName).emit('robot_loadmap_back', message)
     });
+    socket.on('back_move_front', (message) => {
+        // message: one of directions 'go', 'back', 'left', 'right'
+        console.log(message)
+        socket.to(roomName).emit('robot_move_back', message)
+    })
     
     
     // 로직 4 로봇의 메시지 수신
