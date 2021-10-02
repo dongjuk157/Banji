@@ -53,8 +53,11 @@ io.on('connection', socket => {
         socket.to(roomName).emit('robot_loadmap_back', message)
     });
     socket.on('back_move_front', (message) => {
-        // message: one of directions 'go', 'back', 'left', 'right'
-        console.log(message)
+        // message: one of directions 'go', 'back', 'left', 'right', and 'stop'
+        // go, back: linear.x 값 조정
+        // left, right: angular.z 값 조정
+        // stop: x,z 모두 0으로
+        // console.log(message)
         socket.to(roomName).emit('robot_move_back', message)
     })
     
