@@ -17,6 +17,7 @@ const picPath = path.join(__dirname, "/./images/");
 // 로직 1. WebSocket 서버, WebClient 통신 규약 정의
 const server = require('http').createServer(app);
 const io = require('socket.io')(server, { 
+    secure: true,
     cors: { origin: "*" },
     transports: ['websocket', 'polling'],
 })
