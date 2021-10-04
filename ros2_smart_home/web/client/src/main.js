@@ -1,5 +1,6 @@
 import Vue from 'vue';
 import { BootstrapVue, IconsPlugin } from 'bootstrap-vue';
+import io from 'socket.io-client';
 
 import App from './App.vue';
 import router from './router';
@@ -17,6 +18,13 @@ Vue.use(BootstrapVue);
 
 // Optionally install the BootstrapVue icon components plugin
 Vue.use(IconsPlugin);
+
+// socket.io
+// const socket = io('http://localhost:12001');
+const socket = io('http://192.168.0.11:12001', { transports: ['websocket'] });
+// const socket = io('https://j5b301.p.ssafy.io:12001');
+
+Vue.prototype.$socket = socket;
 
 Vue.config.productionTip = false;
 
