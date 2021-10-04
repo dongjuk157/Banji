@@ -100,7 +100,7 @@ export default {
         status: this.myiot[idx][1], // on, off
         control: toggle,
       };
-      console.log('control', data);
+      // console.log('control', data);
       this.$socket.emit('back_control_front', data);
     },
     // getIoTDevices() {

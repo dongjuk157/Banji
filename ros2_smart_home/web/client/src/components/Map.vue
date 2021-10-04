@@ -24,10 +24,10 @@ export default {
       this.isloaded = true;
       const mapArr = message.split(' ');
       this.mapArr = mapArr;
+      console.log(mapArr);
     });
-    if (this.isloaded) {
-      this.draw();
-    }
+    this.loadMap();
+    this.draw();
   },
   methods: {
     loadMap() {

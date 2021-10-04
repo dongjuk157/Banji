@@ -40,7 +40,7 @@ const routes = [
     component: () => import('../components/Map.vue'),
   },
   {
-    path: '/control',
+    path: '/controls',
     name: 'Control',
     component: () => import('../components/Control.vue'),
   },

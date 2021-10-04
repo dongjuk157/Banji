@@ -10,7 +10,7 @@ const express = require('express');
 // const publicPath = path.join(__dirname, "/../client");
 var app = express();
 
-const picPath = path.join(__dirname, "/../client");
+const picPath = path.join(__dirname, "/./images/");
 
 // app.use(express.static(publicPath));
 
@@ -30,6 +30,11 @@ server.listen(port, () => {
     console.log(`listening on *:${port}`);
 });
 
+// server
+app.use('/images', express.static('images'));
+
+
+// socket.io
 const roomName = 'team';
 
 io.on('connection', socket => {
@@ -64,6 +69,18 @@ io.on('connection', socket => {
         // console.log("back_robotview_front")
         socket.to(roomName).emit('robot_robotview_back', message)
     });
+    socket.on('back_getImgList_front', (message) => {
+        // 저장되어있는 파일 리스트 반환
+        fs.readdir(picPath, (err, files) => {
+            if (err) {
+                return console.log("Unable to scan directory:", err)
+            }
+            console.log("In Dir,", files)
+            socket.emit('front_getImgList_back', files);
+        })
+        // socket.to(roomName).emit('front_getImgList_back', files);
+        // 이걸로 하면 roomName엔 보내는거같은데 프론트에서 못읽음. 
+    });
     
     // 로직 4 로봇의 메시지 수신
     socket.on('back_environment_robot', (message) => {
@@ -86,20 +103,23 @@ io.on('connection', socket => {
         // console.log("back_robotview_robot")
         socket.to(roomName).emit('front_robotview_back', message);
     });
-
-
-
+    socket.on('back_alert_robot', (message) => {
+        // 전달받은 이미지를 jpg 파일로 저장
+        // 현재 시각
+        socket.to(roomName).emit('front_alert_back', message);
+        const curTime = new Date().toISOString();
+        let date, time;
+        [date, time] = curTime.split('T')
+        date = date.split('-').join('')
+        time = time.split(':')
+        // console.log(message);
+        buffer = Buffer.from(message, "base64");
+        fileName = `cam_${date}${time[0]}${time[1]}.jpg`
+        fs.writeFileSync(path.join(picPath, `/image/${fileName}`), buffer);
+    });
 
     socket.on('disconnect', () => {
         console.log('disconnected from server');
-    });
-
-    // 전달받은 이미지를 jpg 파일로 저장
-    socket.on('streaming', (message) => {
-        socket.to(roomName).emit('sendStreaming', message);
-        // console.log(message);
-        buffer = Buffer.from(message, "base64");
-        fs.writeFileSync(path.join(picPath, "/../client/cam.jpg"), buffer);
     });
 
 })
