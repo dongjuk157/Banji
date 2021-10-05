@@ -28,14 +28,14 @@ try {
     console.log('No ssl file')
 }
 
-const io = require('socket.io')(server, { 
+const io = require('socket.io')(server, {
     secure: true,
     key: privateKey,
     cert: certificate,
     ca: ca,
     cors: { origin: "*" },
     transports: ['websocket', 'polling'],
-    
+
 })
 
 var fs = require('fs'); // required for file serving
@@ -98,7 +98,7 @@ io.on('connection', socket => {
         // socket.to(roomName).emit('front_getImgList_back', files);
         // 이걸로 하면 roomName엔 보내는거같은데 프론트에서 못읽음. 
     });
-    
+
     // 로직 4 로봇의 메시지 수신
     socket.on('back_environment_robot', (message) => {
         // console.log('환경 정보 줄게')
@@ -134,7 +134,26 @@ io.on('connection', socket => {
         fileName = `cam_${date}${time[0]}${time[1]}.jpg`
         fs.writeFileSync(path.join(picPath, `/image/${fileName}`), buffer);
     });
+    socket.on('back_loadmap_front', (message) => {
+        console.log('지도 줘')
+        socket.to(roomName).emit('robot_loadmap_back', message)
+    });
+    socket.on('back_loadmap_robot', (message) => {
+        console.log('지도 줄게')
+        console.log(message)
+        socket.to(roomName).emit('front_loadmap_back', message);
+    });
 
+    socket.on('back_position_front', (message) => {
+        console.log('로봇 위치 줘')
+        socket.to(roomName).emit('robot_position_back', message)
+    });
+
+    socket.on('back_position_robot', (message) => {
+        console.log('로봇 위치 줄게')
+        console.log(message)
+        socket.to(roomName).emit('front_position_back', message)
+    });
     socket.on('disconnect', () => {
         console.log('disconnected from server');
     });
