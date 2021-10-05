@@ -1,4 +1,11 @@
+import rclpy
+from rclpy.node import Node
+from sub3.ros_iot_connect import *
 import socketio
+import threading
+import time
+from sensor_msgs.msg import CompressedImage, LaserScan
+from sub2.human_detector import *
 
 
 # client 는 socketio의 기본 API로 구성된 노드입니다. 서버와 연결을 시도해서 서버와 통신을 합니다.
@@ -13,35 +20,69 @@ import socketio
 # 3. 서버 연결
 # 4. 데이터 송신
 
-# 로직 1. 클라이언트 소켓 생성
-sio = socketio.Client()
+
+def startConMod(conMod):
+    rclpy.spin(conMod)
+    conMod.destroy_node()
+    rclpy.shutdown()
+
+
+try:
+    # 로직 1. 클라이언트 소켓 생성
+    rclpy.init(args=None)
+    conMod = ros_iot_connect()
+    sio = socketio.Client()
+
+    @sio.event
+    def connect():
+        conMod_thread = threading.Thread(target=startConMod, args=[conMod])
+        conMod_thread.daemon = True
+        conMod_thread.start()
+        print('connection established')
+
+    # 로직 2. 데이터 수신 콜백함수
+    # 프런트가 로봇을 움직인 방법
+    @sio.on('sendAirConOn')
+    def aircon_on(data):
+        print('message received with ', data)
+        conMod.iot.connect()
+        print('연결 끝')
+        conMod.iot.control()
+        print('끝')
+
+    # time/weather/temperature refresh
+    # 프런트 보낼 때방법
+
+    @sio.on("sendStateRefresh")
+    def state_refresh(data):
+        print('시간 날씨 온도 정도 요구 : ', data)
+        print('시간 날씨 온도 정도 요구 : ', conMod.envir)
+        sio.emit('sendTime', [conMod.envir.month, (conMod.envir.day %
+                 30), conMod.envir.hour, conMod.envir.minute])
+        sio.emit('sendWeather', conMod.envir.weather)
+        sio.emit('sendTemperature', conMod.envir.temperature)
+        # scan on/off
+
+    # 스크린샷 보내기
+    @sio.on("robot_screenshot_back")
+    def send_screenshot(data):
+        message = conMod.screenshot
+        sio.emit('back_screenshot_robot', message.decode('utf-8'))
+    
+    @sio.event
+    def disconnect():
+        print('disconnected from server')
+
+    # 로직 3. 서버 연결
+    sio.connect('http://localhost:12001/')
+
+    # 로직 4. 데이터 송신
+    sio.emit('sendTime', 'TEST')
+
+    sio.wait()
+
+except KeyboardInterrupt:
+    exit()
 
 
 
-@sio.event
-def connect():
-    print('connection established')
-
-
-# 로직 2. 데이터 수신 콜백함수
-@sio.on('sendAirConOn')
-def aircon_on(data):
-    print('message received with ', data)
-
-@sio.on('sendAirConOff')
-def aircon_off(data):
-    print('message received with ', data)
-
-
-@sio.event
-def disconnect():
-    print('disconnected from server')
-
-
-# 로직 3. 서버 연결
-sio.connect('http:/192.168.0.11:12001/')
-
-# 로직 4. 데이터 송신
-sio.emit('sendTime','TEST')
-
-sio.wait()
