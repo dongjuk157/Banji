@@ -22,8 +22,8 @@ let certificate = null
 let ca = null
 try {
     privateKey = fs.readFileSync('/etc/letsencrypt/live/j5b301.p.ssafy.io/privkey.pem').toString();
-    certificate = fs.readFileSync('/etc/letsencrypt/live/j5b301.p.ssafy.io/cert.pem').toString();
-    ca = fs.readFileSync('/etc/letsencrypt/live/j5b301.p.ssafy.io/fullchain.pem').toString();
+    certificate = fs.readFileSync('/etc/letsencrypt/live/j5b301.p.ssafy.io/fullchain.pem').toString();
+    ca = fs.readFileSync('/etc/letsencrypt/live/j5b301.p.ssafy.io/cert.pem').toString();
 } catch {
     console.log('No ssl file')
 }
