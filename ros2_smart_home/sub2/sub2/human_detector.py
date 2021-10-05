@@ -7,6 +7,9 @@ from sensor_msgs.msg import CompressedImage, LaserScan
 from std_msgs.msg import Float32MultiArray
 from ssafy_msgs.msg import BBox
 
+import base64
+import socketio
+
 # human detector node의 전체 로직 순서
 # 로직 1 : 노드에 필요한 publisher, subscriber, descriptor, detector 정의
 # 로직 2 : image binarization
@@ -17,6 +20,8 @@ from ssafy_msgs.msg import BBox
 # 로직 7 : bbox 결과 show
 # 로직 8 : bbox msg 송신
 
+sio = socketio.Client()
+sio.connect('http://localhost:12001/')
 
 def non_maximum_supression(bboxes, threshold=0.5):
     """
@@ -115,6 +120,11 @@ class HumanDetector(Node):
 
         self.able_to_pub = True
 
+        self.able_to_pub = True
+        self.humanScreenshot = ''   # 사진 파일 보내기
+        self.take_a_picture = True  # 1분 간격으로 사진을 찍기 위해
+        self.humanScreenshot_timer = 0  # +1을 하면서 660(1분 정도)가 되면 take_a_picture 값을 True로
+
     def img_callback(self, msg):
 
         np_arr = np.frombuffer(msg.data, np.uint8)
@@ -207,6 +217,22 @@ class HumanDetector(Node):
         """
         cv2.imshow("detection result", img_bgr)
         cv2.waitKey(1)
+
+        if not self.take_a_picture:
+            self.humanScreenshot_timer += 1
+            if self.humanScreenshot_timer > 660:
+                self.humanScreenshot_timer = 0           
+                self.take_a_picture = True
+
+        hog_path = 'C:\\Users\\multicampus\\Desktop\\catkin_ws\\src\\ros2_smart_home\\sub3\\sub3\\images\\humanscreemshot.png'
+        if self.take_a_picture:
+            if len(rects_temp):
+                cv2.imwrite(hog_path, img_bgr)
+                with open(hog_path, 'rb') as hog_img:
+                    self.humanScreenshot = base64.b64encode(hog_img.read())
+                    sio.emit('back_alert_robot', self.humanScreenshot.decode('utf-8'))
+                    self.take_a_picture = False
+
 
     def timer_callback(self):
 
