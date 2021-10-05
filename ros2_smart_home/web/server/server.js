@@ -17,11 +17,25 @@ const picPath = path.join(__dirname, "/./images/");
 // 로직 1. WebSocket 서버, WebClient 통신 규약 정의
 // const server = require('http').createServer(app);
 const server = require('https').createServer(app);
+let privateKey = null
+let certificate = null
+let ca = null
+try {
+    privateKey = fs.readFileSync('/etc/letsencrypt/live/j5b301.p.ssafy.io/privkey.pem').toString();
+    certificate = fs.readFileSync('/etc/letsencrypt/live/j5b301.p.ssafy.io/cert.pem').toString();
+    ca = fs.readFileSync('/etc/letsencrypt/live/j5b301.p.ssafy.io/fullchain.pem').toString();
+} catch {
+    console.log('No ssl file')
+}
 
 const io = require('socket.io')(server, { 
     secure: true,
+    key: privateKey,
+    cert: certificate,
+    ca: ca,
     cors: { origin: "*" },
     transports: ['websocket', 'polling'],
+    
 })
 
 var fs = require('fs'); // required for file serving
