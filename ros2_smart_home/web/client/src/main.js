@@ -21,8 +21,8 @@ Vue.use(IconsPlugin);
 
 // socket.io
 // const socket = io('http://localhost:12001');
-const socket = io('http://192.168.0.11:12001', { transports: ['websocket'] });
-// const socket = io('https://j5b301.p.ssafy.io:12001');
+// const socket = io('http://192.168.0.11:12001', { transports: ['websocket'] });
+const socket = io('https://j5b301.p.ssafy.io:12001', { transport: ['websocket'] });
 
 Vue.prototype.$socket = socket;
 
