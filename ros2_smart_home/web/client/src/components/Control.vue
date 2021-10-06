@@ -2,30 +2,30 @@
   <v-container>
     <v-row>
       <v-col
-        cols=4
+        cols=6
       >
       <p>가전</p>
       </v-col>
       <v-col
-        cols=4
+        cols=6
       >
       <p>ON/OFF</p>
       </v-col>
-      <v-col
+      <!-- <v-col
         cols=4
       >
       <p>Video</p>
-      </v-col>
+      </v-col> -->
     </v-row>
     <hr>
     <v-row :id="iot" v-for="(iot, index) in myiot" :key=index>
       <v-col
-        cols=4
+        cols=6
       >
       <p>{{ iot[0] }}</p>
       </v-col>
       <v-col
-        cols=4
+        cols=6
       >
       <v-btn
         @click="control(index)"
@@ -36,13 +36,13 @@
         <!-- {{ btncolor[myiot[index][1]] }} -->
       </v-btn>
       </v-col>
-      <v-col
+      <!-- <v-col
         cols=4
       >
 
       <v-btn
       color="green"><v-icon>mdi-turtle</v-icon><span style="color: white;">Video</span></v-btn>
-      </v-col>
+      </v-col> -->
     </v-row>
   </v-container>
 

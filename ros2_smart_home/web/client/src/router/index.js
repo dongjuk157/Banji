@@ -37,12 +37,22 @@ const routes = [
   {
     path: '/map',
     name: 'Map',
-    component: () => import('../components/Map.vue'),
+    component: () => import('../components/CCTV.vue'),
   },
   {
     path: '/controls',
     name: 'Control',
     component: () => import('../components/Control.vue'),
+  },
+  {
+    path: '/capture',
+    name: 'Capture',
+    component: () => import('../components/ImageViewer.vue'),
+  },
+  {
+    path: '/intruder',
+    name: 'Intruder',
+    component: () => import('../components/IntruderList.vue'),
   },
   {
     path: '/settings/robot',

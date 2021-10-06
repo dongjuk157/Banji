@@ -66,10 +66,10 @@ export default {
   methods: {
     move(index) {
       const message = this.direction[index];
-      this.$socket.emit('back_move_front', message);
+      this.$socket.emit('back_movemanualy_front', message);
     },
     stop() {
-      this.$socket.emit('back_move_front', 'stop');
+      this.$socket.emit('back_movemanualy_front', 'stop');
     },
   },
 };

@@ -13,6 +13,12 @@
       <b-col cols="12" class="btn-main-page" @click="moveAddress">
         가전 제어
       </b-col>
+      <b-col cols="12" class="btn-main-page" @click="moveAddress">
+        나의 반려동물
+      </b-col>
+      <b-col cols="12" class="btn-main-page" @click="moveAddress">
+        침입자 확인
+      </b-col>
     </b-row>
   </b-container>
 </template>
@@ -37,6 +43,12 @@ export default {
           break;
         case '가전 제어':
           this.$router.push({ path: '/controls' });
+          break;
+        case '나의 반려동물':
+          this.$router.push({ path: '/capture' });
+          break;
+        case '침입자 확인':
+          this.$router.push({ path: '/intruder' });
           break;
         default:
       }

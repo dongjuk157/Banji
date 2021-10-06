@@ -20,9 +20,9 @@ Vue.use(BootstrapVue);
 Vue.use(IconsPlugin);
 
 // socket.io
-// const socket = io('http://localhost:12001');
-// const socket = io('http://192.168.0.11:12001', { transports: ['websocket'] });
-const socket = io('https://j5b301.p.ssafy.io/api/', { transport: ['websocket', 'polling'] });
+// const socket = io('http://localhost:12001', { transports: ['websocket'] });
+const socket = io('http://192.168.0.20:12001', { transports: ['websocket'] });
+// const socket = io('https://j5b301.p.ssafy.io/api/', { transport: ['websocket', 'polling'] });
 
 Vue.prototype.$socket = socket;
 
