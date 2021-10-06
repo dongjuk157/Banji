@@ -50,6 +50,22 @@ try:
         conMod.iot.control()
         print('끝')
 
+    @sio.on('robot_loadmap_back')
+    def loadmap(data):
+        sio.emit('back_loadmap_robot', conMod.loadmap())
+
+    @sio.on('robot_move_back')
+    def goTothere(data):
+        conMod.gotothere(data)
+        print("이동")
+        # conMod.move()
+
+    @sio.on('robot_position_back')
+    def position(data):
+        x = int((conMod.pos[0] + 14.75) / 0.05)
+        y = int((conMod.pos[1] - 2.25) / 0.05)
+        mes = [x, y]
+        sio.emit('back_position_robot', mes)
     # time/weather/temperature refresh
     # 프런트 보낼 때방법
 
@@ -68,7 +84,7 @@ try:
     def send_screenshot(data):
         message = conMod.screenshot
         sio.emit('back_screenshot_robot', message.decode('utf-8'))
-    
+
     @sio.event
     def disconnect():
         print('disconnected from server')
@@ -83,6 +99,3 @@ try:
 
 except KeyboardInterrupt:
     exit()
-
-
-
