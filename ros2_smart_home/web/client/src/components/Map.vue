@@ -2,7 +2,11 @@
 <template>
   <div>
     <div>
-      <canvas id="canvas" @click="clickCanvas" width="350" height="350">
+      <canvas
+        id="canvas"
+        @click="clickCanvas"
+        width="350" height="350"
+      >
       </canvas>
     </div>
   </div>
@@ -12,6 +16,12 @@
 // import json from './json/map.json';
 
 export default {
+  props: {
+    canClick: {
+      type: Boolean,
+      default: true,
+    },
+  },
   data() {
     return {
       MAP: [],
@@ -69,10 +79,13 @@ export default {
       this.loadMap();
     },
     clickCanvas(event) {
-      const message = [event.offsetX, event.offsetY];
-      this.ctx.fillStyle = 'rgb('.concat('100', ',', '230', ',', '100', ')');
-      this.ctx.fillRect(event.offsetX, event.offsetY, 2, 2);
-      this.$socket.emit('back_move_front', message);
+      if (this.canClick) {
+        console.log(event.target);
+        const message = [event.offsetX, event.offsetY];
+        this.ctx.fillStyle = 'rgb('.concat('100', ',', '230', ',', '100', ')');
+        this.ctx.fillRect(event.offsetX, event.offsetY, 2, 2);
+        this.$socket.emit('back_move_front', message);
+      }
     },
   },
   created() {

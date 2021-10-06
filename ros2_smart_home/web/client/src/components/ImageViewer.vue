@@ -1,10 +1,5 @@
 <template>
   <v-container>
-    <v-btn
-      @click="update"
-    >
-      Update
-    </v-btn>
     <ul id="imgList">
       <li v-for="img in imgList" :key="img">
         <v-dialog

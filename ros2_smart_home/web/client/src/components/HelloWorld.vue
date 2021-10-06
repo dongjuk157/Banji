@@ -1,39 +1,51 @@
 <template>
-  <v-container>
-    <v-row class="pa-3">
-      <!-- 수동 컨트롤 버튼 생성 -->
-      <v-col cols="6">
-        <p>Manual Controller</p>
-        <Move />
-      </v-col>
-      <!-- 카메라 이미지 뷰어 생성 -->
-      <CameraView />
-      <!-- 저장된 이미지 리스트 출력 및 파일 뷰어-->
-      <ImageViewer />
-    </v-row>
-  </v-container>
+  <div>
+    <Map :canClick="false" />
+    <CameraView />
+    <Move />
+      <!-- v-if="camCheck" -->
+    <v-icon
+      aria-hidden="false"
+      x-large
+      @click="onScreenshot"
+      id="screenshot"
+    >
+      fas fa-camera
+    </v-icon>
+  </div>
 </template>
 
 <script>
+import { mapGetters } from 'vuex';
 import CameraView from './CameraView.vue';
-import ImageViewer from './ImageViewer.vue';
+import Map from './Map.vue';
 import Move from './Move.vue';
 
 export default {
   components: {
     CameraView,
     Move,
-    ImageViewer,
+    Map,
   },
-  data() {
-    return {
-    };
+  methods: {
+    onScreenshot() {
+      this.$socket.emit('back_screenshot_front');
+      // eslint-disable-next-line no-alert
+      alert('저장되었습니다');
+    },
   },
-  mounted() {},
-  methods: {},
-  computed: {},
+  computed: {
+    ...mapGetters([
+      'camCheck',
+    ]),
+  },
 };
 </script>
 
 <style>
+#screenshot {
+  position: absolute;
+  bottom: 1rem;
+  right: 1rem;
+}
 </style>

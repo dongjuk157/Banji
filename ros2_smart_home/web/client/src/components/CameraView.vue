@@ -9,9 +9,6 @@
     >
       cam update
     </v-btn> -->
-    <v-icon aria-hidden="false" x-large @click="onScreenshot">
-      fas fa-camera
-    </v-icon>
     <v-img
       @load="imageLoad"
       @error="imageError"
@@ -32,6 +29,7 @@ export default {
       // console.log(msg);
       const src = `data:image/png;base64,${msg}`;
       this.imgSrc = src;
+      this.$store.dispatch('receiveCam');
     });
   },
   methods: {
@@ -39,10 +37,6 @@ export default {
     //   // console.log('cam');
     //   this.$socket.emit('back_robotview_front', 'cam');
     // },
-    onScreenshot() {
-      this.$socket.emit('back_screenshot_front');
-      console.log('스크린샷 찍기');
-    },
     imageLoad() {},
     imageError() {},
   },

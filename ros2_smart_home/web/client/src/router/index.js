@@ -7,11 +7,6 @@ Vue.use(VueRouter);
 
 const routes = [
   {
-    path: '/test',
-    name: 'Test',
-    component: () => import('../components/HelloWorld.vue'),
-  },
-  {
     path: '/',
     name: 'Home',
     component: Home,
@@ -38,6 +33,11 @@ const routes = [
     path: '/map',
     name: 'Map',
     component: () => import('../components/CCTV.vue'),
+  },
+  {
+    path: '/move',
+    name: 'move',
+    component: () => import('../components/HelloWorld.vue'),
   },
   {
     path: '/controls',
