@@ -15,8 +15,8 @@ const picPath = path.join(__dirname, "/./images/");
 // app.use(express.static(publicPath));
 
 // 로직 1. WebSocket 서버, WebClient 통신 규약 정의
-const server = require('http').createServer(app);
-// const server = require('https').createServer(app);
+// const server = require('http').createServer(app);
+const server = require('https').createServer(app);
 let privateKey = null
 let certificate = null
 let ca = null
@@ -29,10 +29,10 @@ try {
 }
 
 const io = require('socket.io')(server, {
-    // secure: true,
-    // key: privateKey,
-    // cert: certificate,
-    // ca: ca,
+    secure: true,
+    key: privateKey,
+    cert: certificate,
+    ca: ca,
     cors: { origin: "*" },
     transports: ['websocket', 'polling'],
 
