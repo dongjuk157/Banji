@@ -215,8 +215,8 @@ class HumanDetector(Node):
         cv2.
         cv2.waitKey(1)
         """
-        cv2.imshow("detection result", img_bgr)
-        cv2.waitKey(1)
+        # cv2.imshow("detection result", img_bgr)
+        # cv2.waitKey(1)
 
         if not self.take_a_picture:
             self.humanScreenshot_timer += 1
