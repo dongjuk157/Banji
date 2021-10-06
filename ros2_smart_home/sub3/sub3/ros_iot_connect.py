@@ -1,20 +1,14 @@
-from socketio import client
 import rclpy
 from rclpy.node import Node
 from sub3.iot_udp import *
 from ssafy_msgs.msg import TurtlebotStatus, EnviromentStatus
 import time
-import os
-import socket
 import threading
-import struct
-import binascii
-import copy
 import numpy as np
 import cv2
 import base64
-from geometry_msgs.msg import Pose, PoseStamped
-from sensor_msgs.msg import CompressedImage, LaserScan
+from geometry_msgs.msg import PoseStamped, Twist
+from sensor_msgs.msg import CompressedImage
 from sub1.perception import *
 import socketio
 
@@ -27,16 +21,34 @@ class ros_iot_connect(Node):
 
     def __init__(self):
         super().__init__('ros_iot_connect')
-
+        print("ros연결")
         # iot_udp 객체 생성
         self.iot = iot_udp()
+        self.pos = [0., 0.]
         time.sleep(0.5)
         # envir_status 데이터
         self.envir = {"day": 0, "hour": 0, "minute": 0,
-                      "month": 0, "temperature": 0, "weather": ""}
+                    "month": 0, "temperature": 0, "weather": ""}
         self.ebvir_sub = self.create_subscription(
             EnviromentStatus, '/envir_status', self.envir_callback, 10)
 
+        self.goal_pose_pub = self.create_publisher(
+            PoseStamped, 'goal_pose', 10)
+
+        self.subscription = self.create_subscription(
+            TurtlebotStatus, '/turtlebot_status', self.listener_callback, 10)
+
+        # self.cmd_pub = self.create_publisher(Twist, 'cmd_vel', 10)
+
+        self.cmd_msg = Twist()
+
+
+        self.cmd_publisher = self.create_publisher(Twist, 'cmd_vel', 5)
+        self.turtle_sub = self.create_subscription(TurtlebotStatus, '/turtlebot_status',self.turtlebot_status_callback,1)
+        self.linear_x = 0.0
+        self.angular_z = 0.0
+        self.battery = None
+        self.power = None
         ###########################################################################
         # image
         self.screenshot = ''
@@ -59,6 +71,57 @@ class ros_iot_connect(Node):
 
     def envir_callback(self, msg):
         self.envir = msg
+
+    # 수동 주행
+    def turtlebot_status_callback(self, msg):
+        # global linear_x,angular_z
+        self.battery = msg.battery_percentage
+        self.power = msg.power_supply_status
+        self.linear_x = msg.twist.linear.x
+        self.angular_z = msg.twist.angular.z
+    
+    def robot_movement(self,move_cmd):
+
+        # global linear_x,angular_z
+        # print("11",linear_x,angular_z)
+        linear_x = self.linear_x
+        angular_z = self.angular_z
+
+        if move_cmd == 'left':
+
+            self.cmd_msg.linear.x=0.0
+            self.cmd_msg.angular.z=-0.2
+            while angular_z > -0.1:
+                self.cmd_publisher.publish(self.cmd_msg)
+
+        elif move_cmd == 'go':
+            
+            self.cmd_msg.linear.x= 0.2
+            self.cmd_msg.angular.z= 0.0
+            while linear_x < 0.1:
+                self.cmd_publisher.publish(self.cmd_msg)
+
+        elif move_cmd == 'back':
+            
+            self.cmd_msg.linear.x=-0.2
+            self.cmd_msg.angular.z=0.0
+            while linear_x > -0.1:
+                self.cmd_publisher.publish(self.cmd_msg)
+
+        elif move_cmd == 'right':
+            
+            self.cmd_msg.linear.x=0.0
+            self.cmd_msg.angular.z=0.2
+            while angular_z < 0.1:
+                self.cmd_publisher.publish(self.cmd_msg)
+        
+        else:
+
+            self.cmd_msg.linear.x=0.0
+            self.cmd_msg.angular.z=0.0
+            while (linear_x > 0.01 or linear_x < -0.01) or (angular_z > 0.01 or angular_z< -0.01):
+                self.cmd_publisher.publish(self.cmd_msg)
+    ##########################################################
 
     def img_callback(self, msg):
         self.timer += 1
@@ -96,7 +159,7 @@ class ros_iot_connect(Node):
         self.pos[1] = msg.twist.angular.y
 
     def loadmap(self):
-        full_path = 'C:\\Users\\wlsdu\\Desktop\\ssafy_iot\\ros2_smart_home\\sub3\\map\\map.txt'
+        full_path = 'C:\\Users\\multicampus\\Desktop\\catkin_ws\\src\\ros2_smart_home\\sub3\\map\\map.txt'
         self.f = open(full_path, 'r')
         map_size_x = 350
         map_size_y = 350

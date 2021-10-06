@@ -149,6 +149,7 @@ class a_star(Node):
                 # print(len(self.final_path))
                 if len(self.final_path) != 0:
                     self.a_star_pub.publish(self.global_path_msg)
+                    print('publish')
 
     def dijkstra(self, start):
         # a_star: f(x) = g(x) + h(x)

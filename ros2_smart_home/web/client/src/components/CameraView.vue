@@ -4,11 +4,14 @@
     robot이랑 연결되어있을때
     계속 이미지 받는걸로 만들어야됨
      -->
-    <v-btn
+    <!-- <v-btn
       @click="getCam"
     >
       cam update
-    </v-btn>
+    </v-btn> -->
+    <v-icon aria-hidden="false" x-large @click="onScreenshot">
+      fas fa-camera
+    </v-icon>
     <v-img
       @load="imageLoad"
       @error="imageError"
@@ -32,9 +35,13 @@ export default {
     });
   },
   methods: {
-    getCam() {
-      // console.log('cam');
-      this.$socket.emit('back_robotview_front', 'cam');
+    // getCam() {
+    //   // console.log('cam');
+    //   this.$socket.emit('back_robotview_front', 'cam');
+    // },
+    onScreenshot() {
+      this.$socket.emit('back_screenshot_front');
+      console.log('스크린샷 찍기');
     },
     imageLoad() {},
     imageError() {},
