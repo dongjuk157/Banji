@@ -20,6 +20,7 @@ setup(
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
+            'client = sub3.client:main',
             'aws_client = sub3.aws_client:main',
             'tf_detector_skeleton = sub3.tf_detector_skeleton:main',
             'tf_detector = sub3.tf_detector:main',

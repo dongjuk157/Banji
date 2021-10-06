@@ -20,6 +20,7 @@ Vue.use(BootstrapVue);
 Vue.use(IconsPlugin);
 
 // socket.io
+// 로컬에서 하는 경우는 24번째 줄 주석 해제 후 26번째 줄 주석 처리
 // const socket = io('http://localhost:12001', { transports: ['websocket'] });
 // const socket = io('http://192.168.0.20:12001', { transports: ['websocket'] });
 const socket = io('http://j5b301.p.ssafy.io:12001', { transport: ['websocket'] });
