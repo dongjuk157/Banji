@@ -49,7 +49,9 @@ server.listen(port, () => {
 
 // server
 app.use('/images', express.static('images'));
-
+app.get('/api', (req, res) => {
+    res.send('Hello World!')
+  })
 
 // socket.io
 const roomName = 'team';
