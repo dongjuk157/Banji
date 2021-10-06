@@ -1,8 +1,6 @@
 /* eslint-disable comma-dangle */
 <template>
   <div>
-    <button @click="start">지도 불러오기</button>
-    <button @click="request_pos">로봇 불러오기</button>
     <div>
       <canvas id="canvas" @click="clickCanvas" width="350" height="350">
       </canvas>
@@ -24,9 +22,11 @@ export default {
     };
   },
   mounted() {
+    this.ctx = document.getElementById('canvas').getContext('2d');
     this.$socket.on('front_position_back', (mes) => {
       this.ctx.fillStyle = 'rgb('.concat('100', ',', '100', ',', '100', ')');
       this.ctx.fillRect(this.pos[0], this.pos[1], 2, 2);
+      // console.log(this.ctx);
       this.pos = mes;
     });
   },
@@ -74,6 +74,10 @@ export default {
       this.ctx.fillRect(event.offsetX, event.offsetY, 2, 2);
       this.$socket.emit('back_move_front', message);
     },
+  },
+  created() {
+    this.start();
+    this.request_pos();
   },
 };
 </script>

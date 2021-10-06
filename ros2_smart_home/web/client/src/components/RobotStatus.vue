@@ -10,7 +10,7 @@
       <h2>로봇 상태 정보</h2>
       <b-list-group>
         <b-list-group-item v-for="(data, name) in status" :key="name">
-          {{ statusName[name] }} {{ data }}
+          {{ statusName[name] }} : {{ status[name] }}
         </b-list-group-item>
         <b-btn @click="updateRobotStatus">Update</b-btn>
       </b-list-group>
@@ -35,14 +35,8 @@ export default {
       checkRobot: true,
       // 추후에 vuex state에 해당 로봇 상태 데이터를 저장할 예정.
       status: {
-        pos: {
-          x: null,
-          y: null,
-        },
         battery: null,
         power: null,
-        // '현재위치 좌표 x: ': 1.123,
-        // '현재위치 좌표 y :': 2.4545,
         // '배터리 상태 :': '97%',
         // '전력 공급 상태 : ': 4,
         // 더 추가할 것이 있는지
@@ -58,7 +52,6 @@ export default {
         weather: '날씨',
       },
       statusName: {
-        pos: '현재위치',
         battery: '배터리',
         power: '전력 공급 상태',
       },
@@ -67,18 +60,18 @@ export default {
   mounted() {
     this.$socket.on('front_environment_back', (message) => {
       // console.log('sendTimeToWeb', message);
-      // console.log(message);
+      console.log(message);
       const minute = (message.minute < 10) ? `0${String(message.minute)}` : String(message.minute);
       this.envir.time = `${message.month}월 ${message.day}일 ${message.hour}:${minute}`;
       this.envir.weather = message.weather;
       this.envir.temperature = `${message.temperature} ℃`;
+      this.checkRobot = false;
     });
     this.$socket.on('front_robotStatus_back', (message) => {
       console.log(message);
-      this.status.pos.x = message.x;
-      this.status.pos.y = message.y;
       this.status.battery = message.battery;
       this.status.power = message.power;
+      this.checkRobot = false;
     });
     this.updateEnvironment();
     this.updateRobotStatus();
@@ -87,29 +80,22 @@ export default {
   // 이 부분 한번 같이 말해보기 ㅇㅇ
   // 연결 안될수도 있지 않나요? 제일 처음 로봇이랑 연결이 되었는지는 파악해야할거같아서요
   methods: {
-    changeRobotStatus() {
-      this.checkRobot = false;
-      // console.log('왜안나와?');
-    },
+    // changeRobotStatus() {
+    //   this.checkRobot = false;
+    //   // console.log('왜안나와?');
+    // },
     updateEnvironment() {
-      // console.log('environment');
+      console.log('environment');
       const data = { key: 1 };
       this.$socket.emit('back_environment_front', data);
     },
     updateRobotStatus() {
-      // console.log('robot status');
+      console.log('robot status');
       const data = { key: 2 };
       this.$socket.emit('back_robotStatus_front', data);
     },
   },
   created() {
-    // 아니면 css transition으로
-    if (this.checkRobot) {
-      setTimeout(() => {
-        // console.log('gdgd');
-        this.changeRobotStatus();
-      }, 3000);
-    }
   },
 };
 </script>

@@ -27,8 +27,11 @@ def generate_launch_description():
             package='sub2',
             node_executable='path_tracking',
             node_name='path_tracking'
+        ),
+        Node(
+            package='sub2',
+            node_executable='human_detector',
+            node_name='human_detector'
         )
     ])
-
-
 

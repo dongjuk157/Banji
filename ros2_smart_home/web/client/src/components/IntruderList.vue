@@ -46,13 +46,13 @@ export default {
   },
   methods: {
     update() {
-      this.$socket.emit('back_getImgList_front', 'screenshot');
+      this.$socket.emit('back_getImgList_front', 'intruder');
     },
     imgClick(event) {
       const { hostname } = document.location;
       const serverPort = 12001;
       const fileName = event.target.innerText;
-      const imageSrc = `http://${hostname}:${serverPort}/images/screenshot/${fileName}`;
+      const imageSrc = `http://${hostname}:${serverPort}/images/intruder/${fileName}`;
       this.imgSrc = imageSrc;
       console.log(imageSrc);
     },
