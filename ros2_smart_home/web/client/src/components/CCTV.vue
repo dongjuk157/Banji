@@ -2,7 +2,7 @@
   <div>
     <Map />
     <CameraView />
-    <!-- <Move /> -->
+    <Move />
     <v-icon
       v-if="camCheck"
       aria-hidden="false"
@@ -19,13 +19,13 @@
 import { mapGetters } from 'vuex';
 import CameraView from './CameraView.vue';
 import Map from './Map.vue';
-// import Move from './Move.vue';
+import Move from './Move.vue';
 
 export default {
   components: {
     CameraView,
     Map,
-    // Move,
+    Move,
   },
   methods: {
     onScreenshot() {

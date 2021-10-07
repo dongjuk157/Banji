@@ -91,36 +91,37 @@ class ros_iot_connect(Node):
 
             self.cmd_msg.linear.x=0.0
             self.cmd_msg.angular.z=-0.2
-            while angular_z > -0.1:
-                self.cmd_publisher.publish(self.cmd_msg)
+            # while angular_z > -0.1:
+                # self.cmd_publisher.publish(self.cmd_msg)
 
         elif move_cmd == 'go':
             
             self.cmd_msg.linear.x= 0.2
             self.cmd_msg.angular.z= 0.0
-            while linear_x < 0.1:
-                self.cmd_publisher.publish(self.cmd_msg)
+            # while linear_x < 0.1:
+                # self.cmd_publisher.publish(self.cmd_msg)
 
         elif move_cmd == 'back':
             
             self.cmd_msg.linear.x=-0.2
             self.cmd_msg.angular.z=0.0
-            while linear_x > -0.1:
-                self.cmd_publisher.publish(self.cmd_msg)
+            # while linear_x > -0.1:
+                # self.cmd_publisher.publish(self.cmd_msg)
 
         elif move_cmd == 'right':
             
             self.cmd_msg.linear.x=0.0
             self.cmd_msg.angular.z=0.2
-            while angular_z < 0.1:
-                self.cmd_publisher.publish(self.cmd_msg)
+            # while angular_z < 0.1:
+                # self.cmd_publisher.publish(self.cmd_msg)
         
         else:
 
             self.cmd_msg.linear.x=0.0
             self.cmd_msg.angular.z=0.0
-            while (linear_x > 0.01 or linear_x < -0.01) or (angular_z > 0.01 or angular_z< -0.01):
-                self.cmd_publisher.publish(self.cmd_msg)
+            # while (linear_x > 0.01 or linear_x < -0.01) or (angular_z > 0.01 or angular_z< -0.01):
+        self.cmd_publisher.publish(self.cmd_msg)
+        
     ##########################################################
 
     def img_callback(self, msg):
