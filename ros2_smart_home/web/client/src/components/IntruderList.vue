@@ -54,7 +54,6 @@ export default {
       const fileName = event.target.innerText;
       const imageSrc = `http://${hostname}:${serverPort}/images/intruder/${fileName}`;
       this.imgSrc = imageSrc;
-      console.log(imageSrc);
     },
   },
 };

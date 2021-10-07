@@ -61,8 +61,6 @@ export default {
   },
   mounted() {
     this.$socket.on('front_environment_back', (message) => {
-      // console.log('sendTimeToWeb', message);
-      console.log(message);
       const minute = (message.minute < 10) ? `0${String(message.minute)}` : String(message.minute);
       this.envir.time = `${message.month}월 ${message.day}일 ${message.hour}:${minute}`;
       this.envir.weather = message.weather;
@@ -70,7 +68,6 @@ export default {
       this.checkRobot = false;
     });
     this.$socket.on('front_robotStatus_back', (message) => {
-      console.log(message);
       this.status.battery = message.battery;
       this.status.power = message.power;
       this.checkRobot = false;
@@ -84,15 +81,12 @@ export default {
   methods: {
     // changeRobotStatus() {
     //   this.checkRobot = false;
-    //   // console.log('왜안나와?');
     // },
     updateEnvironment() {
-      console.log('environment');
       const data = { key: 1 };
       this.$socket.emit('back_environment_front', data);
     },
     updateRobotStatus() {
-      console.log('robot status');
       const data = { key: 2 };
       this.$socket.emit('back_robotStatus_front', data);
     },

@@ -36,7 +36,6 @@ export default {
     this.$socket.on('front_position_back', (mes) => {
       this.ctx.fillStyle = 'rgb('.concat('100', ',', '100', ',', '100', ')');
       this.ctx.fillRect(this.pos[0], this.pos[1], 5, 5);
-      // console.log(this.ctx);
       this.pos = mes;
     });
   },
@@ -80,7 +79,6 @@ export default {
     },
     clickCanvas(event) {
       if (this.canClick) {
-        console.log(event.target);
         const message = [event.offsetX, event.offsetY];
         this.ctx.fillStyle = 'rgb('.concat('100', ',', '230', ',', '100', ')');
         this.ctx.fillRect(event.offsetX, event.offsetY, 5, 5);

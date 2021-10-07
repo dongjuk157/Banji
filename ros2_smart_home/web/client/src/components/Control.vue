@@ -11,11 +11,6 @@
       >
       <p>ON/OFF</p>
       </v-col>
-      <!-- <v-col
-        cols=4
-      >
-      <p>Video</p>
-      </v-col> -->
     </v-row>
     <hr>
     <v-row :id="iot" v-for="(iot, index) in myiot" :key=index>
@@ -68,7 +63,6 @@ export default {
   },
   mounted() {
     this.$socket.on('front_control_back', (message) => {
-      // console.log('SEND!', message);
       // 받은 상태로 업데이트
       // const message = {
       //   index: idx,
@@ -100,7 +94,6 @@ export default {
         status: this.myiot[idx][1], // on, off
         control: toggle,
       };
-      // console.log('control', data);
       this.$socket.emit('back_control_front', data);
     },
     // getIoTDevices() {

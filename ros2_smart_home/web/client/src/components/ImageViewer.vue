@@ -49,7 +49,6 @@ export default {
       const fileName = event.target.innerText;
       const imageSrc = `http://${hostname}:${serverPort}/images/screenshot/${fileName}`;
       this.imgSrc = imageSrc;
-      console.log(imageSrc);
     },
   },
 };

@@ -41,13 +41,10 @@ export default {
   },
   mounted() {
     this.$socket.on('front_alert_back', (message) => {
-      // console.log(message);
-      // console.log(window.location.pathname.includes('intruder'));
       if (window.location.pathname.includes('intruder')) {
         return;
       }
       this.$store.dispatch('receiveIntruder', message);
-      // console.log(message);
     });
   },
   methods: {
@@ -67,7 +64,6 @@ export default {
     kakaoLoginStep() {
       const code = new URL(window.location.href).searchParams.get('code');
       const step = !!code;
-      // console.log(step);
       return (!this.$store.state.isLogin) && step;
     },
   },

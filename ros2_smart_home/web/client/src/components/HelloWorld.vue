@@ -3,7 +3,6 @@
     <Map :canClick="false" />
     <CameraView />
     <Move />
-      <!-- v-if="camCheck" -->
     <v-icon
       aria-hidden="false"
       x-large
