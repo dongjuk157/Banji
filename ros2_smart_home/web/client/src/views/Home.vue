@@ -16,5 +16,8 @@ export default {
     MainPage,
     LoginPage,
   },
+  created() {
+    this.$store.commit('updateLoginState');
+  },
 };
 </script>
