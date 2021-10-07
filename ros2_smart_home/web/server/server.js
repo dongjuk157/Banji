@@ -21,18 +21,26 @@ let privateKey = null
 let certificate = null
 let ca = null
 try {
+    fs.accessSync('/etc/letsencrypt/live/j5b301.p.ssafy.io/privkey.pem')
+    console.log("privkey can access")
     privateKey = fs.readFileSync('/etc/letsencrypt/live/j5b301.p.ssafy.io/privkey.pem').toString();
+    
+    fs.accessSync('/etc/letsencrypt/live/j5b301.p.ssafy.io/cert.pem')
+    console.log("cert can access")
     certificate = fs.readFileSync('/etc/letsencrypt/live/j5b301.p.ssafy.io/cert.pem').toString();
-    ca = fs.readFileSync('/etc/letsencrypt/live/j5b301.p.ssafy.io/fullchain.pem').toString();
+    
+    fs.accessSync('/etc/letsencrypt/live/j5b301.p.ssafy.io/chain.pem')
+    console.log("chain can access")
+    ca = fs.readFileSync('/etc/letsencrypt/live/j5b301.p.ssafy.io/chain.pem').toString();
 } catch {
-    console.log('No ssl file')
+    console.log('No ssl file or Access denied')
 }
 
 const io = require('socket.io')(server, { 
-    secure: true,
-    key: privateKey,
-    cert: certificate,
-    ca: ca,
+    // secure: true,
+    // key: privateKey,
+    // cert: certificate,
+    // ca: ca,
     cors: { origin: "*" },
     transports: ['websocket', 'polling'],
     
@@ -59,7 +67,7 @@ io.on('connection', socket => {
     // 로직 3. 사용자(frontend)의 메시지 수신시 WebClient로 메시지 전달
     // message = [month, day, hour, minute]
     socket.on('back_environment_front', (message) => {
-        // console.log('환경 정보 줘')
+        console.log('환경 정보 줘')
         socket.to(roomName).emit('robot_environment_back', message);
     });
     socket.on('back_robotStatus_front', (message) => {
@@ -67,15 +75,16 @@ io.on('connection', socket => {
         socket.to(roomName).emit('robot_robotStatus_back', message);
     });
     socket.on('back_control_front', (message) => {
-        // console.log('가전 제어 해')
+        console.log('가전 제어 해')
         socket.to(roomName).emit('robot_control_back', message)
     });
     socket.on('back_loadmap_front', (message) => {
-        // console.log('지도 줘')
+        console.log('지도 줘')
         socket.to(roomName).emit('robot_loadmap_back', message)
     });
     socket.on('back_move_front', (message) => {
         // 좌표 눌렀을 때 자동 이동
+        console.log('자동 이동 해')
         socket.to(roomName).emit('robot_move_back', message)
     });
     socket.on('back_movemanualy_front', (message) => {
@@ -83,7 +92,7 @@ io.on('connection', socket => {
         // go, back: linear.x 값 조정
         // left, right: angular.z 값 조정
         // stop: x,z 모두 0으로
-        // console.log(message)
+        console.log('수동 이동 해')
         socket.to(roomName).emit('robot_movemanualy_back', message)
     });
     socket.on('back_screenshot_front', (message) => {
@@ -92,7 +101,7 @@ io.on('connection', socket => {
         socket.to(roomName).emit('robot_screenshot_back', message)
     });
     socket.on('back_robotview_front', (message) => {
-        // console.log('실시간 영상 줘')
+        console.log('실시간 영상 줘')
         // console.log('실시간 영상', message)
         socket.to(roomName).emit('robot_robotview_back', message)
     });
@@ -110,7 +119,7 @@ io.on('connection', socket => {
         })
     });
     socket.on('back_position_front', (message) => {
-        // console.log('로봇 위치 줘')
+        console.log('로봇 위치 줘')
         socket.to(roomName).emit('robot_position_back', message)
     });
     
@@ -120,7 +129,7 @@ io.on('connection', socket => {
 
     // 로직 4 로봇의 메시지 수신
     socket.on('back_environment_robot', (message) => {
-        // console.log('환경 정보 줄게')
+        console.log('환경 정보 줄게')
         socket.to(roomName).emit('front_environment_back', message);
     });
     socket.on('back_robotStatus_robot', (message) => {
@@ -128,11 +137,11 @@ io.on('connection', socket => {
         socket.to(roomName).emit('front_robotStatus_back', message);
     });
     socket.on('back_control_robot', (message) => {
-        // console.log('가전 제어 했어') 
+        console.log('가전 제어 했어') 
         socket.to(roomName).emit('front_control_back', message);
     });
     socket.on('back_loadmap_robot', (message) => {
-        // console.log('지도 줄게') 
+        console.log('지도 줄게') 
         socket.to(roomName).emit('front_loadmap_back', message);
     });
     socket.on('back_screenshot_robot', (message) => {
@@ -154,7 +163,7 @@ io.on('connection', socket => {
     socket.on('back_alert_robot', (message) => {
         // 전달받은 이미지를 jpg 파일로 저장
         // 현재 시각
-        console.log(message)
+        console.log("침입자 인식!")
         // try {
         const curTime = new Date().toISOString();
         let date, time;
@@ -172,7 +181,7 @@ io.on('connection', socket => {
         socket.to(roomName).emit('front_alert_back', 'intruder!!');
     });
     socket.on('back_position_robot', (message) => {
-        // console.log('로봇 위치 줄게')
+        console.log('로봇 위치 줄게')
         // console.log(message)
         socket.to(roomName).emit('front_position_back', message)
     });
