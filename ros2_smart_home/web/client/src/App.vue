@@ -1,36 +1,39 @@
 <template>
   <v-app id="app">
-    <div>
-      <b-navbar toggleable="lg" type="dark" variant="info">
-        <b-navbar-brand class="mx-3" href="#">반지</b-navbar-brand>
-        <b-navbar-nav class="ml-auto mx-3" v-if='$store.state.isLogin'>
-        <b-nav-item href="#" @click="Logout">Logout</b-nav-item>
-        </b-navbar-nav>
-      </b-navbar>
-    </div>
-    <div id="nav">
-      <router-link to="/">Home</router-link> |
-      <router-link to="/about">반지</router-link>
-    </div>
-    <!-- <button @click="intruder">test</button> -->
-    <div
-      id="intruderAlert"
-      v-if="alertCheck"
-      @click="checkIntruder"
-    >
-      <v-icon
-        color="red"
-      >mdi-alert-circle</v-icon>
-    </div>
-    <router-view/>
+    <v-container v-if="$store.state.isLogin">
+      <div id="nav">
+        <router-link to="/">Home</router-link> |
+        <router-link to="/about">반지</router-link>
+      </div>
+      <!-- <button @click="intruder">test</button> -->
+      <div
+        id="intruderAlert"
+        v-if="alertCheck"
+        @click="checkIntruder"
+      >
+        <v-icon
+          color="red"
+        >mdi-alert-circle</v-icon>
+      </div>
+      <router-view/>
+    </v-container>
+    <v-container v-else>
+      <LoginPage/>
+    </v-container>
   </v-app>
 </template>
 
 <script>
 import { mapGetters } from 'vuex';
-import HomeVue from './views/Home.vue';
+import LoginPage from './components/LoginPage.vue';
 
 export default {
+  components: {
+    LoginPage,
+  },
+  created() {
+    this.$store.commit('updateLoginState');
+  },
   mounted() {
     this.$socket.on('front_alert_back', (message) => {
       console.log(message);
@@ -49,11 +52,6 @@ export default {
     checkIntruder() {
       this.$store.dispatch('viewIntruder');
       this.$router.push({ path: '/intruder' });
-    },
-    Logout() {
-      localStorage.removeItem('isLogin');
-      this.$router.push(HomeVue);
-      window.location.reload();
     },
   },
   computed: {

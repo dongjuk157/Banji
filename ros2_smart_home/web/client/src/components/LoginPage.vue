@@ -1,9 +1,10 @@
 <template>
   <b-container>
+    <h1>반지</h1>
     <b-row>
-      <b-col class="m-3">
-    <img class="dog" alt="dog logo" src="../assets/dog.jpg" />
-     </b-col>
+      <b-col class="p-3">
+        <img class="dog" alt="dog logo" src="../assets/dog.jpg" />
+      </b-col>
     </b-row>
     <b-row>
       <b-col>
