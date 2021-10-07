@@ -7,6 +7,7 @@ export default new Vuex.Store({
   state: {
     isAlert: false,
     onCam: false,
+    isLogin: false,
   },
   mutations: {
     alertChange(state, logic) {
@@ -20,6 +21,9 @@ export default new Vuex.Store({
       if (logic === true || logic === false) {
         state.onCam = logic;
       }
+    },
+    updateLoginState(state, bool) {
+      state.isLogin = bool;
     },
   },
   actions: {
