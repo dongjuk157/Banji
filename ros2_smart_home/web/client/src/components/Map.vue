@@ -35,7 +35,7 @@ export default {
     this.ctx = document.getElementById('canvas').getContext('2d');
     this.$socket.on('front_position_back', (mes) => {
       this.ctx.fillStyle = 'rgb('.concat('100', ',', '100', ',', '100', ')');
-      this.ctx.fillRect(this.pos[0], this.pos[1], 2, 2);
+      this.ctx.fillRect(this.pos[0], this.pos[1], 5, 5);
       // console.log(this.ctx);
       this.pos = mes;
     });
@@ -46,7 +46,7 @@ export default {
     },
     pos() {
       this.ctx.fillStyle = 'rgb('.concat('255', ',', '10', ',', '10', ')');
-      this.ctx.fillRect(this.pos[0], this.pos[1], 2, 2);
+      this.ctx.fillRect(this.pos[0], this.pos[1], 5, 5);
     },
   },
   methods: {
@@ -83,7 +83,7 @@ export default {
         console.log(event.target);
         const message = [event.offsetX, event.offsetY];
         this.ctx.fillStyle = 'rgb('.concat('100', ',', '230', ',', '100', ')');
-        this.ctx.fillRect(event.offsetX, event.offsetY, 2, 2);
+        this.ctx.fillRect(event.offsetX, event.offsetY, 5, 5);
         this.$socket.emit('back_move_front', message);
       }
     },
