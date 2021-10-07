@@ -2,7 +2,7 @@
   <v-app id="app">
     <div id="nav">
       <router-link to="/">Home</router-link> |
-      <router-link to="/about">About</router-link>
+      <router-link to="/about">반지</router-link>
     </div>
     <!-- <button @click="intruder">test</button> -->
     <div

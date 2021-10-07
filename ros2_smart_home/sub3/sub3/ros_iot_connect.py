@@ -14,7 +14,7 @@ import socketio
 
 
 sio = socketio.Client()
-sio.connect('http://localhost:12001/')
+sio.connect('http://j5b301.p.ssafy.io:12001')
 
 
 class ros_iot_connect(Node):
@@ -125,7 +125,7 @@ class ros_iot_connect(Node):
 
     def img_callback(self, msg):
         self.timer += 1
-        if self.timer < 20:
+        if self.timer < 15:
             return
         self.timer = 0
         np_arr = np.frombuffer(msg.data, np.uint8)

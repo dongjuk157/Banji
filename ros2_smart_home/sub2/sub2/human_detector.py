@@ -21,7 +21,7 @@ import socketio
 # 로직 8 : bbox msg 송신
 
 sio = socketio.Client()
-sio.connect('http://localhost:12001/')
+sio.connect('http://j5b301.p.ssafy.io:12001')
 
 def non_maximum_supression(bboxes, threshold=0.5):
     """
