@@ -44,7 +44,6 @@ try:
     # 로직 2. 데이터 수신 콜백함수
     # 프런트가 로봇을 움직인 방법
 
-
     @sio.on('robot_loadmap_back')
     def loadmap(data):
         sio.emit('back_loadmap_robot', conMod.loadmap())
@@ -101,11 +100,11 @@ try:
 
         # 3. 가전 제어
         conMod.iot.connect()
-        conMod.iot.control() # 현재 toggle 밖에 안됨
+        conMod.iot.control()  # 현재 toggle 밖에 안됨
         conMod.iot.disconnect()
 
         # 4. 상태 갱신
-        status = 'ON' if data['status'] == 'OFF' else 'OFF' # 테스트용 토글
+        status = 'ON' if data['status'] == 'OFF' else 'OFF'  # 테스트용 토글
 
         # 5. 완료 메시지 송신
         message = {
@@ -118,7 +117,7 @@ try:
 
     @sio.on("robot_movemanualy_back")
     def move_manually(data):
-        # print("come",data)
+        print("come", data)
         conMod.robot_movement(data)
         # print("gone",data)
 

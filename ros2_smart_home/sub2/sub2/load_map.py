@@ -54,7 +54,7 @@ class loadMap(Node):
         # 로직 2. 맵 데이터 읽고, 2차원 행렬로 변환
         # now_path = os.path.abspath(__file__)
         # file_path = now_path[:-47] + 'ros2_smart_home\\sub3\\map\\map.txt'
-        file_path = 'C:\\Users\\multicampus\\Desktop\\catkin_ws\\src\\ros2_smart_home\\sub3\\map\\map.txt'
+        file_path = 'C:\\Users\\wlsdu\\Desktop\\ssafy_iot\\ros2_smart_home\\sub3\\map\\map.txt'
 
         with open(file_path, 'r') as f:
 

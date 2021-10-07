@@ -28,7 +28,7 @@ class ros_iot_connect(Node):
         time.sleep(0.5)
         # envir_status 데이터
         self.envir = {"day": 0, "hour": 0, "minute": 0,
-                    "month": 0, "temperature": 0, "weather": ""}
+                      "month": 0, "temperature": 0, "weather": ""}
         self.ebvir_sub = self.create_subscription(
             EnviromentStatus, '/envir_status', self.envir_callback, 10)
 
@@ -42,9 +42,9 @@ class ros_iot_connect(Node):
 
         self.cmd_msg = Twist()
 
-
         self.cmd_publisher = self.create_publisher(Twist, 'cmd_vel', 5)
-        self.turtle_sub = self.create_subscription(TurtlebotStatus, '/turtlebot_status',self.turtlebot_status_callback,1)
+        self.turtle_sub = self.create_subscription(
+            TurtlebotStatus, '/turtlebot_status', self.turtlebot_status_callback, 1)
         self.linear_x = 0.0
         self.angular_z = 0.0
         self.battery = None
@@ -79,48 +79,48 @@ class ros_iot_connect(Node):
         self.power = msg.power_supply_status
         self.linear_x = msg.twist.linear.x
         self.angular_z = msg.twist.angular.z
-    
-    def robot_movement(self,move_cmd):
+
+    def robot_movement(self, move_cmd):
 
         # global linear_x,angular_z
         # print("11",linear_x,angular_z)
-        linear_x = self.linear_x
-        angular_z = self.angular_z
+        self.cmd_msg.linear.x = 0.0
+        self.cmd_msg.angular.z = -0.2
+        self.cmd_publisher.publish(self.cmd_msg)
+        # if move_cmd == 'left':
 
-        if move_cmd == 'left':
+        #     self.cmd_msg.linear.x = 0.0
+        #     self.cmd_msg.angular.z = -0.2
+        #     while angular_z > -0.1:
+        #         self.cmd_publisher.publish(self.cmd_msg)
 
-            self.cmd_msg.linear.x=0.0
-            self.cmd_msg.angular.z=-0.2
-            while angular_z > -0.1:
-                self.cmd_publisher.publish(self.cmd_msg)
+        # elif move_cmd == 'go':
 
-        elif move_cmd == 'go':
-            
-            self.cmd_msg.linear.x= 0.2
-            self.cmd_msg.angular.z= 0.0
-            while linear_x < 0.1:
-                self.cmd_publisher.publish(self.cmd_msg)
+        #     self.cmd_msg.linear.x = 0.2
+        #     self.cmd_msg.angular.z = 0.0
+        #     while linear_x < 0.1:
+        #         self.cmd_publisher.publish(self.cmd_msg)
 
-        elif move_cmd == 'back':
-            
-            self.cmd_msg.linear.x=-0.2
-            self.cmd_msg.angular.z=0.0
-            while linear_x > -0.1:
-                self.cmd_publisher.publish(self.cmd_msg)
+        # elif move_cmd == 'back':
 
-        elif move_cmd == 'right':
-            
-            self.cmd_msg.linear.x=0.0
-            self.cmd_msg.angular.z=0.2
-            while angular_z < 0.1:
-                self.cmd_publisher.publish(self.cmd_msg)
-        
-        else:
+        #     self.cmd_msg.linear.x = -0.2
+        #     self.cmd_msg.angular.z = 0.0
+        #     while linear_x > -0.1:
+        #         self.cmd_publisher.publish(self.cmd_msg)
 
-            self.cmd_msg.linear.x=0.0
-            self.cmd_msg.angular.z=0.0
-            while (linear_x > 0.01 or linear_x < -0.01) or (angular_z > 0.01 or angular_z< -0.01):
-                self.cmd_publisher.publish(self.cmd_msg)
+        # elif move_cmd == 'right':
+
+        #     self.cmd_msg.linear.x = 0.0
+        #     self.cmd_msg.angular.z = 0.2
+        #     while angular_z < 0.1:
+        #         self.cmd_publisher.publish(self.cmd_msg)
+
+        # else:
+
+        #     self.cmd_msg.linear.x = 0.0
+        #     self.cmd_msg.angular.z = 0.0
+        #     while (linear_x > 0.01 or linear_x < -0.01) or (angular_z > 0.01 or angular_z < -0.01):
+        #         self.cmd_publisher.publish(self.cmd_msg)
     ##########################################################
 
     def img_callback(self, msg):
@@ -130,8 +130,8 @@ class ros_iot_connect(Node):
         self.timer = 0
         np_arr = np.frombuffer(msg.data, np.uint8)
         img_bgr = cv2.imdecode(np_arr, cv2.IMREAD_COLOR)
-        screenshot_path = 'C:\\Users\\multicampus\\Desktop\\catkin_ws\\src\\ros2_smart_home\\sub3\\sub3\\images\\screenshot.png'
-        robotview_path = 'C:\\Users\\multicampus\\Desktop\\catkin_ws\\src\\ros2_smart_home\\sub3\\sub3\\images\\robotview.png'
+        screenshot_path = 'C:\\Users\\wlsdu\\Desktop\\ssafy_iot\\ros2_smart_home\\sub3\\sub3\\images\\screenshot.png'
+        robotview_path = 'C:\\Users\\wlsdu\\Desktop\\ssafy_iot\\ros2_smart_home\\sub3\\sub3\\images\\robotview.png'
         cv2.imwrite(screenshot_path, img_bgr)
         with open(screenshot_path, 'rb') as screenshot_img:
             self.screenshot = base64.b64encode(screenshot_img.read())
@@ -159,7 +159,7 @@ class ros_iot_connect(Node):
         self.pos[1] = msg.twist.angular.y
 
     def loadmap(self):
-        full_path = 'C:\\Users\\multicampus\\Desktop\\catkin_ws\\src\\ros2_smart_home\\sub3\\map\\map.txt'
+        full_path = 'C:\\Users\\wlsdu\\Desktop\\ssafy_iot\\ros2_smart_home\\sub3\\map\\map.txt'
         self.f = open(full_path, 'r')
         map_size_x = 350
         map_size_y = 350

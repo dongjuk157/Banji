@@ -5,8 +5,8 @@
         <v-btn
           fab text small
           color="grey darken-2"
-          @mousedown="move(0)"
-          @mouseup="stop"
+          @click="move(0)"
+
         >
           <v-icon small>
             mdi-chevron-up
@@ -19,8 +19,7 @@
         <v-btn
           fab text small
           color="grey darken-2"
-          @mousedown="move(2)"
-          @mouseup="stop"
+          @click="move(2)"
         >
           <v-icon small>
             mdi-chevron-left
@@ -31,8 +30,7 @@
         <v-btn
           fab text small
           color="grey darken-2"
-          @mousedown="move(1)"
-          @mouseup="stop"
+          @click="move(1)"
         >
           <v-icon small>
             mdi-chevron-down
@@ -43,16 +41,24 @@
         <v-btn
           fab text small
           color="grey darken-2"
-          @mousedown="move(3)"
-          @mouseup="stop"
+          @click="move(3)"
         >
           <v-icon small>
             mdi-chevron-right
           </v-icon>
+
         </v-btn>
       </v-col>
     </v-row>
+       <v-btn
+             fab text small
+          color="grey darken-2"
+   @click="stop">
+     <v-icon small>
+            mdi-chevron-right
+          </v-icon></v-btn>
   </v-row>
+
 </template>
 
 <script>
@@ -66,6 +72,7 @@ export default {
   methods: {
     move(index) {
       const message = this.direction[index];
+      console.log(message);
       this.$socket.emit('back_movemanualy_front', message);
     },
     stop() {
