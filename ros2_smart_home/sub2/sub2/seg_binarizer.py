@@ -29,28 +29,24 @@ class IMGParser(Node):
             self.img_callback,
             10)
 
-        #초기 이미지를 None으로 초기화한다
+        # 초기 이미지를 None으로 초기화한다
         self.img_bgr = None
 
         self.timer_period = 0.03
 
         self.timer = self.create_timer(self.timer_period, self.timer_callback)
-        
 
     def img_callback(self, msg):
-
         # 로직 2. compressed image 받기
         np_arr = np.frombuffer(msg.data, np.uint8)
         self.img_bgr = cv2.imdecode(np_arr, cv2.IMREAD_COLOR)
 
-
     def find_bbox(self):
-
         """
         # 로직 3. bgr 이미지의 binarization
         # 지갑, 키 등의 물체에 대한 bgr 값을 알고, 이 값 범위에 해당되는
         # cv2.inRange 함수를 써서 각 물체에 대해 binarization 하십시오.
-        
+
         lower_wal = 
         upper_wal = 
         lower_bp = 
@@ -69,7 +65,32 @@ class IMGParser(Node):
         self.img_key = cv2.inRange(self.img_bgr, lower_key, upper_key)
 
         """
+        # 시뮬레이터 메뉴얼 참조 or 이미지 캡처 후 그림판에서 데이터 추출
+        # lower_wal = (10, 240, 240)  # 지갑 20 255 246
+        # upper_wal = (35, 255, 255)
+        # lower_bp = (95, 200, 235)  # 가방 104 216 246
+        # upper_bp = (120, 230, 255)
+        # lower_rc = (90, 190, 200)  # 리모콘 111 209 215
+        # upper_rc = (130, 230, 230)
+        # lower_key = (10, 240, 240)
+        # upper_key = (35, 255, 255)
 
+        lower_wal = (100,245,255)
+        upper_wal = (110,255,255)
+        lower_bp = (100,210,235)
+        upper_bp = (110,220,255)
+        lower_rc = (100,210,200)
+        upper_rc = (110,220,220)
+        lower_key = (100,240,200)
+        upper_key = (110,250,220)
+
+        self.img_wal = cv2.inRange(self.img_bgr, lower_wal, upper_wal)
+
+        self.img_bp = cv2.inRange(self.img_bgr, lower_bp, upper_bp)
+
+        self.img_rc = cv2.inRange(self.img_bgr, lower_rc, upper_rc)
+
+        self.img_key = cv2.inRange(self.img_bgr, lower_key, upper_key)
         """
         # 로직 4. 물체의 contour 찾기
         # 지갑, 키 등의 물체들이 차지한 픽셀만 흰색으로 이진화되어 있는 이미지에 대해서,
@@ -85,6 +106,14 @@ class IMGParser(Node):
         contours_key, _ = 
 
         """
+        
+        contours_wal, _ = cv2.findContours(self.img_wal,cv2.RETR_LIST,cv2.CHAIN_APPROX_SIMPLE)
+
+        contours_bp, _ = cv2.findContours(self.img_bp,cv2.RETR_LIST,cv2.CHAIN_APPROX_SIMPLE)
+
+        contours_rc, _ = cv2.findContours(self.img_rc,cv2.RETR_LIST,cv2.CHAIN_APPROX_SIMPLE)
+
+        contours_key, _ = cv2.findContours(self.img_key,cv2.RETR_LIST,cv2.CHAIN_APPROX_SIMPLE)
 
         """
         # 로직 5. 물체의 bounding box 좌표 찾기
@@ -98,39 +127,49 @@ class IMGParser(Node):
         self.find_cnt(contours_key)
 
         """
+        self.find_cnt(contours_wal)
+
+        self.find_cnt(contours_bp)
+
+        self.find_cnt(contours_rc)
+
+        self.find_cnt(contours_key)
 
     def find_cnt(self, contours):
-
         """
         # 로직 5. 물체의 bounding box 좌표 찾기
         # 지갑, 키 등의 물체들의 흰색 영역을 감싸는 contour 결과를 가지고
         # bbox를 원본 이미지에 draw 하십시오.
-        
+
         for cnt in contours:
-    
+
             x, y, w, h = 
 
             cv2.rectangle( ... )
 
         """     
+        for cnt in contours:
+    
+            x, y, w, h = cv2.boundingRect(cnt)
 
+            cv2.rectangle( self.img_bgr, (x,y), (x+w,y+h), (0,255,0), 2)
 
     def timer_callback(self):
-
+        
         if self.img_bgr is not None:
-            
-            # 이미지가 ros subscriber로 받고 None이 아닌 array로 정의됐을 때,
-            # object에 대한 bbox 추정을 시작.             
-            self.find_bbox()
 
+            # 이미지가 ros subscriber로 받고 None이 아닌 array로 정의됐을 때,
+            # object에 대한 bbox 추정을 시작.
+            self.find_bbox()
+            
             # 로직 6. 물체의 bounding box 가 그려진 이미지 show
             cv2.imshow("seg_results", self.img_bgr)
-
+            
             cv2.waitKey(1)
         else:
             pass
 
-        
+
 def main(args=None):
 
     rclpy.init(args=args)
