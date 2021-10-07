@@ -133,7 +133,7 @@ try:
         print('disconnected from server')
 
     # 로직 3. 서버 연결
-    sio.connect('https://j5b301.p.ssafy.io/api')
+    sio.connect('http://j5b301.p.ssafy.io:12001')
 
     # 로직 4. 데이터 송신
     sio.emit('sendTime', 'TEST')
