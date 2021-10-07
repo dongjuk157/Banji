@@ -22,7 +22,6 @@ export default {
   data: () => ({
     client_id: '5ba6d91bd5b746ea331fa2f4a67e44f7',
     redirect_uri: 'https://j5b301.p.ssafy.io/oauth/callback/kakao',
-    //redirect_uri: 'http://localhost:8080/oauth/callback/kakao',
   }),
   computed: {
     kakaoLoginLink() {
