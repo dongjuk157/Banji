@@ -1,12 +1,10 @@
 <template>
   <div>
+    <b-spinner></b-spinner>
   </div>
 </template>
 
 <script>
-// import axios from 'axios';
-import HomeVue from '../views/Home.vue';
-
 export default {
   name: 'CallBack',
   created() {
@@ -15,7 +13,8 @@ export default {
       this.$store.commit('updateLoginState');
       localStorage.setItem('isLogin', true);
     }
-    this.$router.push(HomeVue);
+    this.$router.push({ path: '/' });
+    window.location.reload();
   },
 };
 </script>

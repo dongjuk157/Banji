@@ -45,6 +45,9 @@ export default new Vuex.Store({
     camCheck(state) {
       return state.onCam;
     },
+    loginCheck(state) {
+      return state.isLogin;
+    },
   },
   modules: {
   },

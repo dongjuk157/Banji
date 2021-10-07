@@ -1,6 +1,6 @@
 <template>
   <v-app id="app">
-    <v-container v-if="$store.state.isLogin">
+    <v-container v-if="loginCheck">
       <div id="nav">
         <router-link to="/">Home</router-link> |
         <router-link to="/about">반지</router-link>
@@ -17,6 +17,9 @@
       </div>
       <router-view/>
     </v-container>
+    <v-container v-else-if="kakaoLoginStep">
+      <CallBack />
+    </v-container>
     <v-container v-else>
       <LoginPage/>
     </v-container>
@@ -25,18 +28,20 @@
 
 <script>
 import { mapGetters } from 'vuex';
+import CallBack from './components/CallBack.vue';
 import LoginPage from './components/LoginPage.vue';
 
 export default {
   components: {
     LoginPage,
+    CallBack,
   },
   created() {
     this.$store.commit('updateLoginState');
   },
   mounted() {
     this.$socket.on('front_alert_back', (message) => {
-      console.log(message);
+      // console.log(message);
       // console.log(window.location.pathname.includes('intruder'));
       if (window.location.pathname.includes('intruder')) {
         return;
@@ -57,7 +62,14 @@ export default {
   computed: {
     ...mapGetters([
       'alertCheck',
+      'loginCheck',
     ]),
+    kakaoLoginStep() {
+      const code = new URL(window.location.href).searchParams.get('code');
+      const step = !!code;
+      // console.log(step);
+      return (!this.$store.state.isLogin) && step;
+    },
   },
 };
 </script>

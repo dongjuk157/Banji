@@ -1,7 +1,9 @@
 <template>
   <div v-if="checkRobot">
-    <h1 style="margin-top: 50%;">로봇<br>찾는중...</h1>
-    <div class="d-flex justify-content-center align-items-center" style="margin-top: 70px;">
+    <h1 class="loadingMsg">
+      로봇<br>찾는중...
+    </h1>
+    <div class="loadingSpinner">
       <b-spinner></b-spinner>
     </div>
   </div>
@@ -102,11 +104,21 @@ export default {
 
 <style scoped>
   .status {
-    /* display: inline-block; */
-    margin-top: 30%;
-    padding: 10px;
+    padding: 1rem;
     animation: fadein 2.5s;
     -webkit-animation: fadein 2.5s; /* Safari and Chrome */
+  }
+  .loadingMsg {
+    position: absolute;
+    top: 40%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+  }
+  .loadingSpinner {
+    position: absolute;
+    top: 60%;
+    left: 50%;
+    transform: translate(-50%, -50%);
   }
 
   @keyframes fadein {
