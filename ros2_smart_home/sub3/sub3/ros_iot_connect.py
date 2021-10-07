@@ -120,7 +120,12 @@ class ros_iot_connect(Node):
             self.cmd_msg.linear.x=0.0
             self.cmd_msg.angular.z=0.0
             # while (linear_x > 0.01 or linear_x < -0.01) or (angular_z > 0.01 or angular_z< -0.01):
-        self.cmd_publisher.publish(self.cmd_msg)
+        # self.cmd_publisher.publish(self.cmd_msg)
+        self.cnt = 7
+        while self.cnt > 0 and ((abs(linear_x - self.cmd_msg.linear.x) > 0.1) or (abs(angular_z - self.cmd_msg.angular.z) > 0.1)):
+            self.cnt -= 1
+            time.sleep(0.3)
+            self.cmd_publisher.publish(self.cmd_msg)
         
     ##########################################################
 
