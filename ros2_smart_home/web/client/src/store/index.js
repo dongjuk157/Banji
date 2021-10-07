@@ -22,8 +22,8 @@ export default new Vuex.Store({
         state.onCam = logic;
       }
     },
-    updateLoginState(state, bool) {
-      state.isLogin = bool;
+    updateLoginState(state) {
+      state.isLogin = localStorage.getItem('isLogin');
     },
   },
   actions: {

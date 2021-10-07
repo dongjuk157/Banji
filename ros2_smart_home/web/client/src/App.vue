@@ -1,5 +1,13 @@
 <template>
   <v-app id="app">
+    <div>
+      <b-navbar toggleable="lg" type="dark" variant="info">
+        <b-navbar-brand class="mx-3" href="#">반지</b-navbar-brand>
+        <b-navbar-nav class="ml-auto mx-3" v-if='$store.state.isLogin'>
+        <b-nav-item href="#" @click="Logout">Logout</b-nav-item>
+        </b-navbar-nav>
+      </b-navbar>
+    </div>
     <div id="nav">
       <router-link to="/">Home</router-link> |
       <router-link to="/about">반지</router-link>
@@ -20,6 +28,7 @@
 
 <script>
 import { mapGetters } from 'vuex';
+import HomeVue from './views/Home.vue';
 
 export default {
   mounted() {
@@ -40,6 +49,11 @@ export default {
     checkIntruder() {
       this.$store.dispatch('viewIntruder');
       this.$router.push({ path: '/intruder' });
+    },
+    Logout() {
+      localStorage.removeItem('isLogin');
+      this.$router.push(HomeVue);
+      window.location.reload();
     },
   },
   computed: {
