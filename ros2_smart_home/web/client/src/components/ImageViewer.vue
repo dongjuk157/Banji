@@ -35,7 +35,7 @@ export default {
   },
   mounted() {
     this.$socket.on('front_getImgList_back', (msg) => {
-      this.imgList = msg;
+      this.imgList = msg.sort();
     });
     this.update();
   },
